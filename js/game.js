@@ -1,157 +1,226 @@
+// create a new scene named "Game"
 let gameScene = new Phaser.Scene("Game");
 
+// some parameters for our scene
 gameScene.init = function () {
-  // Define parameters of the scene
-  this.playerSpeed = 2;
-  this.enemyMinSpeed = 1;
-  this.enemyMaxSpeed = 4;
-  this.enemyMinY = 80;
-  this.enemyMaxY = 280;
-  this.isTerminating = false;
-};
-
-// Load assets
-gameScene.preload = function () {
-  this.load.image("background", "assets/background.png");
-  this.load.image("enemy", "assets/dragon.png");
-  this.load.image("player", "assets/player.png");
-  this.load.image("goal", "assets/treasure.png");
-};
-
-gameScene.create = function () {
-  let gameWidth = this.sys.game.config.width;
-  let gameHeight = this.sys.game.config.height;
-  let bg = this.add.sprite(0, 0, "background");
-  bg.setOrigin(0, 0);
-
-  this.player = this.add.sprite(40, gameHeight / 2, "player");
-  this.player.setScale(0.5);
-
-  this.goal = this.add.sprite(gameWidth - 80, gameHeight / 2, "goal");
-  this.goal.setScale(0.6);
-
-  this.enemies = this.add.group({
-    key: "enemy",
-    repeat: 5,
-    setXY: {
-      x: 90,
-      y: 100,
-      stepX: 80,
-      stepY: 20,
+  this.nextWord = undefined;
+  this.words = [
+    {
+      key: "building",
+      setXY: {
+        x: 100,
+        y: 240,
+      },
+      spanish: "Edificio",
     },
-  });
+    {
+      key: "house",
+      setXY: {
+        x: 240,
+        y: 280,
+      },
+      setScale: {
+        x: 0.8,
+        y: 0.8,
+      },
+      spanish: "Casa",
+    },
+    {
+      key: "car",
+      setXY: {
+        x: 400,
+        y: 300,
+      },
+      setScale: {
+        x: 0.8,
+        y: 0.8,
+      },
+      spanish: "Automovil",
+    },
+    {
+      key: "tree",
+      setXY: {
+        x: 550,
+        y: 250,
+      },
+      spanish: "Arbol",
+    },
+  ];
+};
 
-  // this.enemy = this.add.sprite(120, gameHeight / 2, "enemy");
-  // this.enemy.flipX = true;
-  // this.enemy.setScale(0.6);
+// load asset files for our game
+gameScene.preload = function () {
+  this.load.image("background", "assets/images/background-city.png");
+  this.load.image("building", "assets/images/building.png");
+  this.load.image("car", "assets/images/car.png");
+  this.load.image("house", "assets/images/house.png");
+  this.load.image("tree", "assets/images/tree.png");
 
-  // this.enemies.add(this.enemy);
+  this.load.audio("treeAudio", "assets/audio/arbol.mp3");
+  this.load.audio("carAudio", "assets/audio/auto.mp3");
+  this.load.audio("houseAudio", "assets/audio/casa.mp3");
+  this.load.audio("buildingAudio", "assets/audio/edificio.mp3");
+  this.load.audio("treeAudio", "assets/audio/arbol.mp3");
+  this.load.audio("correctAudio", "assets/audio/correct.mp3");
+  this.load.audio("wrongAudio", "assets/audio/wrong.mp3");
+};
+
+// executed once, after assets were loaded
+gameScene.create = function () {
+  this.items = this.add.group(this.words);
+
+  let bg = this.add.sprite(0, 0, "background").setOrigin(0, 0);
+  // bg.depth = -1;
+  this.items.setDepth(1);
+
+  // let items = this.items.getChildren();
+
+  // for (let i = 0; i < this.items.length; i++) {
+  //   let item = items[i];
+
+  //   item.setInteractive();
+
+  //   // Resize tween
+  //   item.resizeTween = this.tweens.add({
+  //     targets: item,
+  //     scaleX: 1.2,
+  //     scaleY: 1.2,
+  //     duration: 200,
+  //     paused: true,
+  //     yoyo: true,
+  //   });
+
+  //   item.alphaTween = this.tweens.add({
+  //     targets: item,
+  //     alpha: 0.7,
+  //     duration: 200,
+  //     paused: true,
+  //   });
+  //   item.on(
+  //     "pointerdown",
+  //     function (pointer) {
+  //       item.resizeTween.restart();
+  //       // Show next question
+  //       this.showNextQuestion();
+  //     },
+  //     this
+  //   );
+
+  //   item.on("pointerover", function (pointer) {
+  //     item.alphaTween.restart();
+  //   });
+  //   item.on("pointerout", function (pointer) {
+  //     item.alphaTween.stop(); // Because animation may still be running
+  //     item.alpha = 1;
+  //   });
+  // }
+
   Phaser.Actions.Call(
-    this.enemies.getChildren(),
-    function (enemy) {
-      enemy.flipX = true;
-      // Set enemy speed
-      let direction = Math.random() < 0.5 ? 1 : -1;
-      let speed = Math.floor(
-        Math.random() * (this.enemyMaxSpeed - this.enemyMinSpeed + 1) +
-          this.enemyMinSpeed
+    this.items.getChildren(),
+    function (item) {
+      item.setInteractive();
+
+      // Resize tween
+      item.correctTween = this.tweens.add({
+        targets: item,
+        scaleX: 1.2,
+        scaleY: 1.2,
+        duration: 200,
+        paused: true,
+        yoyo: true,
+      });
+
+      item.wrongTween = this.tweens.add({
+        targets: item,
+        scaleX: 1.2,
+        scaleY: 1.2,
+        duration: 200,
+        angle: 90,
+        paused: true,
+        yoyo: true,
+      });
+
+      item.alphaTween = this.tweens.add({
+        targets: item,
+        alpha: 0.7,
+        duration: 200,
+        paused: true,
+      });
+      item.on(
+        "pointerdown",
+        function (pointer) {
+          // item.resizeTween.restart();
+          // Show next question
+
+          let result = this.processAnswer(item.texture.key);
+          if (result) {
+            item.correctTween.restart();
+          } else {
+            item.wrongTween.restart();
+          }
+          console.log("RESULT", result);
+          this.showNextQuestion();
+        },
+        this
       );
 
-      enemy.speed = direction * speed;
+      item.on("pointerover", function (pointer) {
+        item.alphaTween.restart();
+      });
+      item.on("pointerout", function (pointer) {
+        item.alphaTween.stop(); // Because animation may still be running
+        item.alpha = 1;
+      });
     },
     this
   );
 
-  // Modify group scale
-  Phaser.Actions.ScaleXY(this.enemies.getChildren(), -0.4, -0.4);
+  this.wordText = this.add.text(30, 20, " ", {
+    font: "28px Open Sans",
+    fill: "#ffffff",
+  });
 
-  // Set enemy speed
-  // let direction = Math.random() < 0.5 ? 1 : -1;
-  // let speed = Math.floor(
-  //   Math.random() * (this.enemyMaxSpeed - this.enemyMinSpeed + 1) +
-  //     this.enemyMinSpeed
-  // );
+  this.correctSound = this.sound.add("correctAudio");
+  this.wrongSound = this.sound.add("wrongAudio");
 
-  // this.enemy.speed = direction * speed;
+  this.showNextQuestion();
 };
 
-// Upto 60 times per second
-gameScene.update = function () {
-  // Dont run if terminating
-  if (this.isTerminating) {
-    return;
-  }
+// SHow question
 
-  // Check for active input (Click / Touch)
-  if (this.input.activePointer.isDown) {
-    this.player.x += this.playerSpeed;
-  }
+gameScene.showNextQuestion = function () {
+  //Select random word - Phase has util functions
+  this.nextWord = Phaser.Math.RND.pick(this.words);
 
-  // Check goal touch
-  let playerBounds = this.player.getBounds();
-  let goalBounds = this.goal.getBounds();
+  //Play sound
+  let spainishSound = this.sound.add(`${this.nextWord.key}Audio`);
+  spainishSound.play();
+  // SHow Text
 
-  // Empty return to exit and continue other code
-  if (Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, goalBounds)) {
-    return this.gameOver();
-  }
+  this.wordText.setText(this.nextWord.spanish);
+};
 
-  // ENemy movement
-  let enemies = this.enemies.getChildren();
-  let numOfEnemies = enemies.length;
-
-  for (let i = 0; i < numOfEnemies; i++) {
-    enemies[i].y += enemies[i].speed;
-
-    const dragonGoingUp =
-      enemies[i].speed < 0 && enemies[i].y <= this.enemyMinY;
-    const dragonGoingDown =
-      enemies[i].speed > 0 && enemies[i].y >= this.enemyMaxY;
-
-    // Check not passed the bounds (Y plane) reverse
-    if (dragonGoingUp || dragonGoingDown) {
-      enemies[i].speed *= -1;
-    }
-
-    let enemyBounds = enemies[i].getBounds();
-
-    // Empty return to exit and continue other code
-    if (
-      Phaser.Geom.Intersects.RectangleToRectangle(playerBounds, enemyBounds)
-    ) {
-      return this.gameOver();
-    }
+gameScene.processAnswer = function (userResponse) {
+  console.log("X : ", this.nextWord.key);
+  console.log("Y : ", userResponse);
+  if (userResponse === this.nextWord.key) {
+    this.correctSound.play();
+    return true;
+  } else {
+    this.wrongSound.play();
+    return false;
   }
 };
 
-gameScene.gameOver = function () {
-  // Initiate game over
-  this.isTerminating = true;
-
-  this.cameras.main.shake(500);
-  this.cameras.main.on(
-    "camerashakecomplete",
-    function (camera, effect) {
-      this.cameras.main.fade(500);
-      // Add this so this function has scene context
-    },
-    this
-  );
-
-  this.cameras.main.on(
-    "camerafadeoutcomplete",
-    function () {
-      this.scene.restart();
-    },
-    this
-  );
-};
-
+// our game's configuration
 let config = {
-  type: Phaser.AUTO, // Phaser uses WebGL if avail or Canvas
+  type: Phaser.AUTO,
   width: 640,
   height: 360,
   scene: gameScene,
+  title: "Spanish Learning Game",
+  pixelArt: false,
 };
 
+// create the game, and pass it the configuration
 let game = new Phaser.Game(config);

@@ -147,7 +147,7 @@ class GameScene extends Phaser.Scene {
     if (this.player.playerAttacking && !this.player.swordHit) {
       this.player.swordHit = true;
       // enemy.makeInactive();
-      this.events.emit("monsterAttacked", enemy.id);
+      this.events.emit("monsterAttacked", enemy.id, this.player.id);
     }
   }
 
@@ -199,6 +199,10 @@ class GameScene extends Phaser.Scene {
           monster.updateHealth(health);
         }
       });
+    });
+
+    this.events.on("updatePlayerHealth", (playerID, health) => {
+      this.player.updateHealth(health);
     });
     this.gameManager = new GameManager(this, this.map.map.objects);
     this.gameManager.setup();

@@ -17,4 +17,9 @@ class PlayerModel {
   updateGold(gold) {
     this.gold += gold;
   }
+
+  updateHealth(health) {
+    this.health += health;
+    console.log("HP: ", this.health);
+  }
 }

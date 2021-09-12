@@ -34,7 +34,6 @@ class Monster extends Phaser.Physics.Arcade.Image {
   }
 
   updateHealth(health) {
-    console.log("HIT");
     this.health = health;
     this.updateHealthBar();
   }

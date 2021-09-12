@@ -82,6 +82,17 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
         this.spawners[this.chests[chestID].spawnerId].removeObject(chestID);
       }
     });
+    this.scene.events.on("destoryEnemy", (monsterId) => {
+      // Update spawner
+      if (this.monsters[monsterId]) {
+        // Check if exists in object array
+        // Get its spawnerID
+        // In spawner ID call remove object
+        this.spawners[this.monsters[monsterId].spawnerId].removeObject(
+          monsterId
+        );
+      }
+    });
   }
   setupSpawners() {
     const config = {

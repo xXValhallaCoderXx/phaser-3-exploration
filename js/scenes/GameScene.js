@@ -36,7 +36,7 @@ class GameScene extends Phaser.Scene {
   }
 
   createPlayer(location) {
-    this.player = new Player(
+    this.player = new PlayerContainer(
       this,
       location[0] * 2,
       location[1] * 2,
@@ -48,6 +48,7 @@ class GameScene extends Phaser.Scene {
   createGroups() {
     // Chest group
     this.chests = this.physics.add.group();
+    this.monsters = this.physics.add.group();
     // Create locations
     // this.chestPositons = [
     //   [100, 100],
@@ -71,7 +72,7 @@ class GameScene extends Phaser.Scene {
     let chest = this.chests.getFirstDead(); // Loop through chest group and get first inactive object in array
     // If none active - phase will return null
     if (!chest) {
-      const chest = new Chest(
+      chest = new Chest(
         this,
         chestObj.x * 2,
         chestObj.y * 2,
@@ -81,6 +82,7 @@ class GameScene extends Phaser.Scene {
         chestObj.id
       );
       this.chests.add(chest);
+      chest.setCollideWorldBounds(true);
     } else {
       chest.coins = chestObj.gold;
       chest.id = chestObj.id;
@@ -90,8 +92,30 @@ class GameScene extends Phaser.Scene {
   }
 
   spawnMonster(monsterObj) {
-    // TODO: Add monster
-    console.log("MONSTER: ", monsterObj);
+    let monster = this.monsters.getFirstDead(); // Loop through chest group and get first inactive object in array
+    // If none active - phase will return null
+    if (!monster) {
+      monster = new Monster(
+        this,
+        monsterObj.x * 2,
+        monsterObj.y * 2,
+        "monsters",
+        monsterObj.frame,
+        monsterObj.id,
+        monsterObj.health,
+        monsterObj.maxHealth
+      );
+      this.monsters.add(monster);
+      monster.setCollideWorldBounds(true);
+    } else {
+      // monster.coins = monsterObj.gold;
+      monster.id = monsterObj.id;
+      monster.health = monsterObj.health;
+      monster.maxHealth = monsterObj.maxHealth;
+      monster.setTexture("monsters", monsterObj.frame);
+      monster.setPosition(monsterObj.x * 2, monsterObj.y * 2);
+      monster.makeActive();
+    }
   }
 
   createInput() {
@@ -107,6 +131,20 @@ class GameScene extends Phaser.Scene {
       null,
       this
     );
+    this.physics.add.collider(this.monsters, this.map.blockedLayer);
+    this.physics.add.overlap(
+      this.player,
+      this.monsters,
+      this.enemyOverlap,
+      null,
+      this
+    );
+  }
+
+  enemyOverlap(player, enemy) {
+    console.log("TOUCH");
+    enemy.makeInactive();
+    this.events.emit("destroyEnemey", enemy.id);
   }
 
   collectChest(player, chest) {

@@ -40,8 +40,8 @@ class Spawner {
   spawnMonster() {
     const location = this.pickRandomLocation();
     const gold = randomNumber(1, 100);
-    const monsterType = random(0, 20);
-    const health = random(3, 5);
+    const monsterType = randomNumber(0, 20);
+    const health = randomNumber(3, 5);
     const monster = new MonsterModel(
       location[0],
       location[1],

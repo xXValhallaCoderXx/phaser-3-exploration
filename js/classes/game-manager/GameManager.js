@@ -17,36 +17,51 @@ class GameManager {
     this.setupSpawners();
     this.spawnPlayer();
   }
+  /* 
 
+
+Logout
+My Courses
+Subscriber Discounts
+My Account
+The anchor point of an object is the point of its sprite where its location points to. For example, in Tiled, the location of an object refers to the location of its bottom left corner. On the other hand, in Phaser 3, the default anchor point is the middle of the object.
+
+Because of that, when creating a new object from a Tiled map, you need to handle this difference in order to create the object visually in the same location as in the Tiled map.
+
+An easy way to fix that is changing the parseMapData method to adjust the locations accordingly, as below. Notice that, instead of using (obj.x, obj.y) we use (obj.x + (obj.width / 2), obj.y – (obj.height / 2)).
+*/
   parseMapData() {
     this.mapData.forEach((layer) => {
       if (layer.name === "player_locations") {
-        layer.objects.forEach((player) =>
-          this.playerLocations.push([player.x, player.y])
+        layer.objects.forEach((obj) =>
+          this.playerLocations.push([
+            obj.x + obj.width / 2,
+            obj.y - obj.height / 2,
+          ])
         );
       } else if (layer.name === "chest_locations") {
-        layer.objects.forEach((chest) => {
-          if (this.chestLocations[chest.properties.spawner]) {
-            this.chestLocations[chest.properties.spawner].push([
-              chest.x,
-              chest.y,
+        layer.objects.forEach((obj) => {
+          if (this.chestLocations[obj.properties.spawner]) {
+            this.chestLocations[obj.properties.spawner].push([
+              obj.x + obj.width / 2,
+              obj.y - obj.height / 2,
             ]);
           } else {
-            this.chestLocations[chest.properties.spawner] = [
-              [chest.x, chest.y],
+            this.chestLocations[obj.properties.spawner] = [
+              [obj.x + obj.width / 2, obj.y - obj.height / 2],
             ];
           }
         });
       } else if (layer.name === "monster_locations") {
-        layer.objects.forEach((monster) => {
-          if (this.monsterLocations[monster.properties.spawner]) {
-            this.monsterLocations[monster.properties.spawner].push([
-              monster.x,
-              monster.y,
+        layer.objects.forEach((obj) => {
+          if (this.monsterLocations[obj.properties.spawner]) {
+            this.monsterLocations[obj.properties.spawner].push([
+              obj.x + obj.width / 2,
+              obj.y - obj.height / 2,
             ]);
           } else {
-            this.chestLocations[monster.properties.spawner] = [
-              [monster.x, monster.y],
+            this.monsterLocations[obj.properties.spawner] = [
+              [obj.x + obj.width / 2, obj.y - obj.height / 2],
             ];
           }
         });
@@ -76,6 +91,7 @@ class GameManager {
       id: ``,
     };
     let spawner;
+
     Object.keys(this.chestLocations).forEach((key) => {
       config.id = `chest-${key}`;
       spawner = new Spawner(

@@ -13,16 +13,19 @@ class GameScene extends Phaser.Scene {
   preload() {}
 
   create() {
+    this.createMap();
     this.createAudio();
     this.createChest();
-    this.createWalls();
-    this.createPlayer();
-    this.addCollisions();
+
     this.createInput();
+
+    this.createGameManager();
   }
   update() {
-    // On classes update method is not run automatically so we are calling it
-    this.player.update(this.cursors);
+    if (this.player) {
+      // On classes update method is not run automatically so we are calling it
+      this.player.update(this.cursors);
+    }
   }
 
   createAudio() {
@@ -32,13 +35,14 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  createPlayer() {
-    this.player = new Player(this, 32, 32, "characters", 0); // NEW
-  }
-
-  createWalls() {
-    this.wall = this.physics.add.image(500, 100, "button1");
-    this.wall.setImmovable();
+  createPlayer(location) {
+    this.player = new Player(
+      this,
+      location[0] * 2,
+      location[1] * 2,
+      "characters",
+      0
+    ); // NEW
   }
 
   createChest() {
@@ -64,8 +68,15 @@ class GameScene extends Phaser.Scene {
   spawnChest() {
     const location =
       this.chestPositons[Math.floor(Math.random() * this.chestPositons.length)];
-    const chest = new Chest(this, location[0], location[1], "items", 0);
-    this.chests.add(chest);
+    let chest = this.chests.getFirstDead(); // Loop through chest group and get first inactive object in array
+    // If none active - phase will return null
+    if (!chest) {
+      const chest = new Chest(this, location[0], location[1], "items", 0);
+      this.chests.add(chest);
+    } else {
+      chest.setPosition(location[0], location[1]);
+      chest.makeActive();
+    }
   }
 
   createInput() {
@@ -73,7 +84,7 @@ class GameScene extends Phaser.Scene {
   }
 
   addCollisions() {
-    this.physics.add.collider(this.player, this.wall);
+    this.physics.add.collider(this.player, this.map.blockedLayer);
     this.physics.add.overlap(
       this.player,
       this.chests,
@@ -84,11 +95,24 @@ class GameScene extends Phaser.Scene {
   }
 
   collectChest(player, chest) {
-    chest.destroy();
+    chest.makeInactive();
     this.goldPickupSound.play();
     this.score += chest.coins;
     this.events.emit("updateScore", this.score);
     // Delayed call so the chest if it spawns in same location as player its not instantly collected
     this.time.delayedCall(1000, this.spawnChest, [], this);
+  }
+
+  createMap() {
+    this.map = new Map(this, "map", "background", "background", "blocked");
+  }
+
+  createGameManager() {
+    this.events.on("spawnPlayer", (location) => {
+      this.createPlayer(location);
+      this.addCollisions();
+    });
+    this.gameManager = new GameManager(this, this.map.map.objects);
+    this.gameManager.setup();
   }
 }

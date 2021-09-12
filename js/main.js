@@ -17,6 +17,8 @@ let config = {
       },
     },
   },
+  pixelArt: true,
+  roundPixels: true, // Sometimes when sclaing it may be a float number
 };
 
 // create the game, and pass it the configuration

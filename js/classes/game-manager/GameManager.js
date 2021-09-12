@@ -68,9 +68,6 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
         });
       }
     });
-
-    console.log("PLAYERS:", this.playerLocations);
-    console.log("MONSTER: ", this.monsterLocations);
   }
 
   setupEventListeners() {
@@ -168,7 +165,8 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
         config,
         this.monsterLocations[key],
         this.addMonster.bind(this),
-        this.deleteMonster.bind(this)
+        this.deleteMonster.bind(this),
+        this.moveMonsters.bind(this)
       );
       this.spawners[spawner.id] = spawner;
     });
@@ -195,5 +193,9 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
 
   deleteMonster(id) {
     delete this.monsters[id];
+  }
+
+  moveMonsters() {
+    this.scene.events.emit("monsterMovement", this.monsters);
   }
 }

@@ -1,0 +1,18 @@
+{
+  "name": "phaser-3-mmorpg",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:xXValhallaCoderXx/phaser-3-exploration.git",
+  "author": "xXValhallaCoderXx <renate.gouveia@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
+}

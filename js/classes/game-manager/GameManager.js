@@ -107,6 +107,12 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
             monsterId
           );
           this.scene.events.emit("monsterRemoved", monsterId);
+          this.players[playerID].updateHealth(2);
+          this.scene.events.emit(
+            "updatePlayerHealth",
+            playerID,
+            this.players[playerID].health
+          );
         } else {
           this.players[playerID].updateHealth(-attack);
           this.scene.events.emit(
@@ -120,6 +126,16 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
             playerID,
             this.players[playerID].health
           );
+
+          // Chjeck player halth
+          if (this.players[playerID].health <= 0) {
+            this.players[playerID].updateGold(
+              parseInt(-this.players[playerID].gold / 2)
+            );
+            this.scene.events.emit("updateScore", this.players[playerID].gold);
+            this.players[playerID].respawn();
+            this.scene.events.emit("respawnPlayer", this.players[playerID]);
+          }
         }
       }
     });

@@ -4,6 +4,7 @@ class GameManager {
     this.mapData = mapData;
 
     this.spawners = {};
+    this.players = {};
     this.chests = {};
     this.monsters = {};
     this.playerLocations = [];
@@ -73,13 +74,18 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
   }
 
   setupEventListeners() {
-    this.scene.events.on("pickupChest", (chestID) => {
+    this.scene.events.on("pickupChest", (chestID, playerID) => {
       // Update spawner
       if (this.chests[chestID]) {
+        const { gold } = this.chests[chestID];
+        this.players[playerID].updateGold(gold);
+        // Update score
+        this.scene.events.emit("updateScore", this.players[playerID].gold);
         // Check if exists in object array
         // Get its spawnerID
         // In spawner ID call remove object
         this.spawners[this.chests[chestID].spawnerId].removeObject(chestID);
+        this.scene.events.emit("chestRemoved", chestID);
       }
     });
     this.scene.events.on("monsterAttacked", (monsterId) => {
@@ -142,12 +148,9 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
     });
   }
   spawnPlayer() {
-    const location =
-      this.playerLocations[
-        Math.floor(Math.random() * this.playerLocations.length)
-      ];
-
-    this.scene.events.emit("spawnPlayer", location);
+    const player = new PlayerModel(this.playerLocations);
+    this.players[player.id] = player;
+    this.scene.events.emit("spawnPlayer", player);
   }
 
   addChest(id, chest) {

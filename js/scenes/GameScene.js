@@ -7,7 +7,6 @@ class GameScene extends Phaser.Scene {
     // Launch instead of start will run scene in parallele - what ever scene active 1st is on bittom lauyet
     // Start will shut down current and switch to new
     this.scene.launch("Ui");
-    this.score = 0;
   }
 
   preload() {}
@@ -35,13 +34,16 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  createPlayer(location) {
+  createPlayer(player) {
     this.player = new PlayerContainer(
       this,
-      location[0] * 2,
-      location[1] * 2,
+      player.x * 2,
+      player.y * 2,
       "characters",
-      0
+      0,
+      player.health,
+      player.maxHealth,
+      player.id
     ); // NEW
   }
 
@@ -152,11 +154,11 @@ class GameScene extends Phaser.Scene {
   collectChest(player, chest) {
     chest.makeInactive();
     this.goldPickupSound.play();
-    this.score += chest.coins;
+
     this.events.emit("updateScore", this.score);
     // Delayed call so the chest if it spawns in same location as player its not instantly collected
     // this.time.delayedCall(1000, this.spawnChest, [], this);
-    this.events.emit("pickupChest", chest.id);
+    this.events.emit("pickupChest", chest.id, player.id);
   }
 
   createMap() {
@@ -164,8 +166,8 @@ class GameScene extends Phaser.Scene {
   }
 
   createGameManager() {
-    this.events.on("spawnPlayer", (location) => {
-      this.createPlayer(location);
+    this.events.on("spawnPlayer", (player) => {
+      this.createPlayer(player);
       this.addCollisions();
     });
     this.events.on("chestSpawned", (chest) => {
@@ -179,6 +181,14 @@ class GameScene extends Phaser.Scene {
       this.monsters.getChildren().forEach((monster) => {
         if (monster.id === monsterID) {
           monster.makeInactive();
+        }
+      });
+    });
+
+    this.events.on("chestRemoved", (chestID) => {
+      this.chests.getChildren().forEach((chest) => {
+        if (chest.id === chestID) {
+          chest.makeInactive();
         }
       });
     });

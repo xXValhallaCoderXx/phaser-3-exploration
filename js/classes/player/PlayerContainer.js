@@ -1,5 +1,5 @@
 class PlayerContainer extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, key, frame) {
+  constructor(scene, x, y, key, frame, health, maxHealth, id) {
     super(scene, x, y);
 
     //store a reference to the scene
@@ -9,6 +9,9 @@ class PlayerContainer extends Phaser.GameObjects.Container {
     this.playerAttacking = false;
     this.flipX = true;
     this.swordHit = false;
+    this.health = health;
+    this.maxHealth = maxHealth;
+    this.id = id;
     // set size on container
     // by default container wont have size till objs added
     this.setSize(64, 64);

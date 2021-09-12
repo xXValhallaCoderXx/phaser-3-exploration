@@ -1,6 +1,11 @@
 // create a new scene
 let gameScene = new Phaser.Scene("Game");
 
+// Pool of object
+// Check if an object is created, instead of creating one each time
+// Only creates if no new active object available
+// When finished the object is deativated
+
 // some parameters for our scene
 gameScene.init = function () {
   // player params
@@ -37,6 +42,7 @@ gameScene.preload = function () {
 
 // executed once, after assets were loaded
 gameScene.create = function () {
+  // Better to use a loader scene
   if (!this.anims.get("walking")) {
     // Walking animation
     this.anims.create({
@@ -65,13 +71,21 @@ gameScene.create = function () {
   // Setup world
   this.setupLevel();
 
-  this.physics.world.bounds.width = 360;
-  this.physics.world.bounds.height = 700;
+  // Start Barrel SPawner
+  this.setupSpawner();
 
-  // camera bounds
-  this.cameras.main.setBounds(0, 0, 360, 700);
-  this.cameras.main.startFollow(this.player);
-  // Better to use a loader scene
+  this.physics.add.collider(
+    [this.goal, this.player, this.barrels],
+    this.platforms
+  );
+  // Array can only be done with physics group
+  this.physics.add.overlap(
+    this.player,
+    [this.fires, this.goal, this.barrels],
+    this.restartGame,
+    null, // Function to check if you want to run restartGame or now
+    this
+  );
 
   // let ground = this.add.sprite(180, 604, "ground");
   // 2nd param is false by default
@@ -114,13 +128,13 @@ gameScene.update = function () {
   // blocked = only true on world boundary or static tile
   let onGround =
     this.player.body.blocked.down || this.player.body.touching.down;
-  if (this.cursors.left.isDown) {
+  if (this.cursors.left.isDown && !this.cursors.right.isDown) {
     this.player.body.setVelocityX(-this.playerSpeed);
     this.player.flipX = false;
     if (onGround && !this.player.anims.isPlaying) {
       this.player.anims.play("walking");
     }
-  } else if (this.cursors.right.isDown) {
+  } else if (this.cursors.right.isDown && !this.cursors.left.isDown) {
     this.player.body.setVelocityX(this.playerSpeed);
     this.player.flipX = true;
     if (onGround && !this.player.anims.isPlaying) {
@@ -144,6 +158,9 @@ gameScene.update = function () {
 
 gameScene.setupLevel = function () {
   this.levelData = this.cache.json.get("levelData");
+
+  this.physics.world.bounds.width = this.levelData.world.width;
+  this.physics.world.bounds.height = this.levelData.world.height;
 
   // this.fires = this.add.group();
   this.fires = this.physics.add.group({
@@ -196,22 +213,21 @@ gameScene.setupLevel = function () {
 
   this.player.body.setCollideWorldBounds(true);
 
+  // camera bounds
+  this.cameras.main.setBounds(
+    0,
+    0,
+    this.levelData.world.length,
+    this.levelData.world.height
+  );
+  this.cameras.main.startFollow(this.player);
+
   this.goal = this.add.sprite(
     this.levelData.goal.x,
     this.levelData.goal.y,
     "goal"
   );
   this.physics.add.existing(this.goal);
-
-  this.physics.add.collider([this.goal, this.player], this.platforms);
-  // Array can only be done with physics group
-  this.physics.add.overlap(
-    this.player,
-    [this.fires, this.goal],
-    this.restartGame,
-    null, // Function to check if you want to run restartGame or now
-    this
-  );
 };
 
 gameScene.restartGame = function (sourceSprite, targetSprite) {
@@ -224,6 +240,40 @@ gameScene.restartGame = function (sourceSprite, targetSprite) {
     },
     this
   );
+};
+
+gameScene.setupSpawner = function () {
+  this.barrels = this.physics.add.group({
+    bounceY: 0.1,
+    bounceX: 1,
+    collideWorldBounds: true,
+  });
+
+  let spawningEvent = this.time.addEvent({
+    delay: this.levelData.spawner.interval,
+    loop: true,
+    callbackScope: this,
+    callback: function () {
+      // Create barrel
+      // let barrel = this.barrels.create(this.goal.x, this.goal.y, "barrel");
+
+      let barrel = this.barrels.get(this.goal.x, this.goal.y, "barrel");
+      barrel.setActive(true);
+      barrel.setVisible(true);
+      barrel.body.enable = true;
+      barrel.setVelocityX(this.levelData.spawner.speed);
+      this.time.addEvent({
+        delay: this.levelData.spawner.lifespan,
+        repeat: 0,
+        callbackScope: this,
+        callback: function () {
+          // barrel.destroy();
+          this.barrels.killAndHide(barrel);
+          barrel.body.enable = false;
+        },
+      });
+    },
+  });
 };
 
 // our game's configuration

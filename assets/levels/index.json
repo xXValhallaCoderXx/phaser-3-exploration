@@ -7,6 +7,15 @@
     "x": 30,
     "y": 65
   },
+  "world": {
+    "width": 360,
+    "height": 700
+  },
+  "spawner": {
+    "interval": 2000,
+    "speed": 100,
+    "lifespan": 10000
+  },
   "fires": [
     { "x": 13, "y": 538 },
     { "x": 328, "y": 188 },

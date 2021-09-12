@@ -22,9 +22,10 @@ class Spawner {
   }
 
   spawnObject() {
-    console.log("SPAWNING SOMETHING");
     if (this.objectType === SPAWN_TYPE.CHEST) {
       this.spawnChest();
+    } else if (this.objectType === SPAWN_TYPE.MONSTER) {
+      this.spawnMonster();
     }
   }
 
@@ -34,6 +35,24 @@ class Spawner {
     const chest = new ChestModel(location[0], location[1], gold, this.id);
     this.objectsCreated.push(chest);
     this.addObject(chest.id, chest);
+  }
+
+  spawnMonster() {
+    const location = this.pickRandomLocation();
+    const gold = randomNumber(1, 100);
+    const monsterType = random(0, 20);
+    const health = random(3, 5);
+    const monster = new MonsterModel(
+      location[0],
+      location[1],
+      gold,
+      this.id,
+      monsterType,
+      health,
+      1
+    );
+    this.objectsCreated.push(monster);
+    this.addObject(monster.id, monster);
   }
 
   pickRandomLocation() {
@@ -58,6 +77,6 @@ class Spawner {
 
   removeObject(id) {
     this.objectsCreated === this.objectsCreated.filter((obj) => obj.id !== id);
-    thiws.deleteObject(id);
+    this.deleteObject(id);
   }
 }

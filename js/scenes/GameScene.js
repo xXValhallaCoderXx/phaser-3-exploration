@@ -15,7 +15,7 @@ class GameScene extends Phaser.Scene {
   create() {
     this.createMap();
     this.createAudio();
-    this.createChest();
+    this.createGroups();
 
     this.createInput();
 
@@ -45,38 +45,53 @@ class GameScene extends Phaser.Scene {
     ); // NEW
   }
 
-  createChest() {
+  createGroups() {
     // Chest group
     this.chests = this.physics.add.group();
     // Create locations
-    this.chestPositons = [
-      [100, 100],
-      [200, 200],
-      [300, 300],
-      [400, 400],
-      [500, 500],
-    ];
+    // this.chestPositons = [
+    //   [100, 100],
+    //   [200, 200],
+    //   [300, 300],
+    //   [400, 400],
+    //   [500, 500],
+    // ];
 
-    // Max number of chests
-    this.maxNumber = 3;
-    for (let i = 0; i < this.maxNumber; i += 1) {
-      // SPawn chest
-      this.spawnChest();
-    }
+    // // Max number of chests
+    // this.maxNumber = 3;
+    // for (let i = 0; i < this.maxNumber; i += 1) {
+    //   // SPawn chest
+    //   this.spawnChest();
+    // }
   }
 
-  spawnChest() {
-    const location =
-      this.chestPositons[Math.floor(Math.random() * this.chestPositons.length)];
+  spawnChest(chestObj) {
+    // const location =
+    //   this.chestPositons[Math.floor(Math.random() * this.chestPositons.length)];
     let chest = this.chests.getFirstDead(); // Loop through chest group and get first inactive object in array
     // If none active - phase will return null
     if (!chest) {
-      const chest = new Chest(this, location[0], location[1], "items", 0);
+      const chest = new Chest(
+        this,
+        chestObj.x * 2,
+        chestObj.y * 2,
+        "items",
+        0,
+        chestObj.gold,
+        chestObj.id
+      );
       this.chests.add(chest);
     } else {
-      chest.setPosition(location[0], location[1]);
+      chest.coins = chestObj.gold;
+      chest.id = chestObj.id;
+      chest.setPosition(chestObj.x * 2, chestObj.y * 2);
       chest.makeActive();
     }
+  }
+
+  spawnMonster(monsterObj) {
+    // TODO: Add monster
+    console.log("MONSTER: ", monsterObj);
   }
 
   createInput() {
@@ -100,7 +115,8 @@ class GameScene extends Phaser.Scene {
     this.score += chest.coins;
     this.events.emit("updateScore", this.score);
     // Delayed call so the chest if it spawns in same location as player its not instantly collected
-    this.time.delayedCall(1000, this.spawnChest, [], this);
+    // this.time.delayedCall(1000, this.spawnChest, [], this);
+    this.events.emit("pickupChest", chest.id);
   }
 
   createMap() {
@@ -111,6 +127,12 @@ class GameScene extends Phaser.Scene {
     this.events.on("spawnPlayer", (location) => {
       this.createPlayer(location);
       this.addCollisions();
+    });
+    this.events.on("chestSpawned", (chest) => {
+      this.spawnChest(chest);
+    });
+    this.events.on("monsterSpawned", (monster) => {
+      this.spawnMonster(monster);
     });
     this.gameManager = new GameManager(this, this.map.map.objects);
     this.gameManager.setup();

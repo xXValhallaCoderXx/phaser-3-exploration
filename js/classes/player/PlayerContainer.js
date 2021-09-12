@@ -1,5 +1,5 @@
 class PlayerContainer extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, key, frame, health, maxHealth, id) {
+  constructor(scene, x, y, key, frame, health, maxHealth, id, attackAudio) {
     super(scene, x, y);
 
     //store a reference to the scene
@@ -12,6 +12,7 @@ class PlayerContainer extends Phaser.GameObjects.Container {
     this.health = health;
     this.maxHealth = maxHealth;
     this.id = id;
+    this.attackAudio = attackAudio;
     // set size on container
     // by default container wont have size till objs added
     this.setSize(64, 64);
@@ -99,6 +100,7 @@ class PlayerContainer extends Phaser.GameObjects.Container {
       Phaser.Input.Keyboard.JustDown(cursors.space) &&
       !this.playerAttacking
     ) {
+      this.attackAudio.play();
       this.weapon.alpha = 1;
       this.playerAttacking = true;
       this.scene.time.delayedCall(

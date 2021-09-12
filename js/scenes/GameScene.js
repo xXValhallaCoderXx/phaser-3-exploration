@@ -32,6 +32,22 @@ class GameScene extends Phaser.Scene {
       loop: false,
       // volume: 0.2,
     });
+    this.playerAttackAudio = this.sound.add("playerAttack", {
+      loop: false,
+      // volume: 0.2,
+    });
+    this.playerDamageAudio = this.sound.add("playerDamage", {
+      loop: false,
+      // volume: 0.2,
+    });
+    this.playerDeathAudio = this.sound.add("playerDeath", {
+      loop: false,
+      // volume: 0.2,
+    });
+    this.monsterDeathAudio = this.sound.add("enemyDeath", {
+      loop: false,
+      // volume: 0.2,
+    });
   }
 
   createPlayer(player) {
@@ -43,7 +59,8 @@ class GameScene extends Phaser.Scene {
       0,
       player.health,
       player.maxHealth,
-      player.id
+      player.id,
+      this.playerAttackAudio
     ); // NEW
   }
 
@@ -181,6 +198,7 @@ class GameScene extends Phaser.Scene {
       this.monsters.getChildren().forEach((monster) => {
         if (monster.id === monsterID) {
           monster.makeInactive();
+          this.monsterDeathAudio.play();
         }
       });
     });
@@ -203,10 +221,14 @@ class GameScene extends Phaser.Scene {
 
     this.events.on("updatePlayerHealth", (playerID, health) => {
       this.player.updateHealth(health);
+      if (health < this.player.health) {
+        this.playerDamageAudio.play();
+      }
     });
 
     this.events.on("respawnPlayer", (player) => {
       this.player.respawn(player);
+      this.playerDeathAudio.play();
     });
     this.gameManager = new GameManager(this, this.map.map.objects);
     this.gameManager.setup();

@@ -82,15 +82,29 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
         this.spawners[this.chests[chestID].spawnerId].removeObject(chestID);
       }
     });
-    this.scene.events.on("destoryEnemy", (monsterId) => {
+    this.scene.events.on("monsterAttacked", (monsterId) => {
       // Update spawner
       if (this.monsters[monsterId]) {
-        // Check if exists in object array
-        // Get its spawnerID
-        // In spawner ID call remove object
-        this.spawners[this.monsters[monsterId].spawnerId].removeObject(
-          monsterId
-        );
+        // Subtract HP
+        console.log("WHAT: ", this.monsters[monsterId]);
+        this.monsters[monsterId].loseHealth();
+
+        // CHeck monster dead then remove
+        if (this.monsters[monsterId].health <= 0) {
+          // Check if exists in object array
+          // Get its spawnerID
+          // In spawner ID call remove object
+          this.spawners[this.monsters[monsterId].spawnerId].removeObject(
+            monsterId
+          );
+          this.scene.events.emit("monsterRemoved", monsterId);
+        } else {
+          this.scene.events.emit(
+            "updateMonsterHealth",
+            monsterId,
+            this.monsters[monsterId].health
+          );
+        }
       }
     });
   }

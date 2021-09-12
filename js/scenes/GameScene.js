@@ -133,7 +133,7 @@ class GameScene extends Phaser.Scene {
     );
     this.physics.add.collider(this.monsters, this.map.blockedLayer);
     this.physics.add.overlap(
-      this.player,
+      this.player.weapon,
       this.monsters,
       this.enemyOverlap,
       null,
@@ -142,9 +142,11 @@ class GameScene extends Phaser.Scene {
   }
 
   enemyOverlap(player, enemy) {
-    console.log("TOUCH");
-    enemy.makeInactive();
-    this.events.emit("destroyEnemey", enemy.id);
+    if (this.player.playerAttacking && !this.player.swordHit) {
+      this.player.swordHit = true;
+      // enemy.makeInactive();
+      this.events.emit("monsterAttacked", enemy.id);
+    }
   }
 
   collectChest(player, chest) {
@@ -171,6 +173,22 @@ class GameScene extends Phaser.Scene {
     });
     this.events.on("monsterSpawned", (monster) => {
       this.spawnMonster(monster);
+    });
+
+    this.events.on("monsterRemoved", (monsterID) => {
+      this.monsters.getChildren().forEach((monster) => {
+        if (monster.id === monsterID) {
+          monster.makeInactive();
+        }
+      });
+    });
+
+    this.events.on("updateMonsterHealth", (monsterID, health) => {
+      this.monsters.getChildren().forEach((monster) => {
+        if (monster.id === monsterID) {
+          monster.updateHealth(health);
+        }
+      });
     });
     this.gameManager = new GameManager(this, this.map.map.objects);
     this.gameManager.setup();

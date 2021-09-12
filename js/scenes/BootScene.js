@@ -4,7 +4,17 @@ class BootScene extends Phaser.Scene {
   }
 
   preload() {
+    this.loadImages();
+    this.loadAudio();
+    this.loadSpriteSheets();
+  }
+
+  loadImages() {
     this.load.image("button1", "assets/images/ui/blue_button01.png");
+    this.load.image("button2", "assets/images/ui/blue_button02.png");
+  }
+
+  loadSpriteSheets() {
     this.load.spritesheet("items", "assets/images/items.png", {
       frameWidth: 32,
       frameHeight: 32,
@@ -13,7 +23,9 @@ class BootScene extends Phaser.Scene {
       frameWidth: 32,
       frameHeight: 32,
     });
+  }
 
+  loadAudio() {
     // Could provide a wav and mp3 and phaser will choose best one for broswser
     this.load.audio("goalSound", ["assets/audio/Pickup.wav"]);
   }

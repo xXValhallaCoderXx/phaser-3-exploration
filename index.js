@@ -3,10 +3,27 @@ require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
 const bodyParser = require("body-parser");
+const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 
-const mainRoutes = require("./js/routes/main");
-const passwordRoutes = require("./js/routes/password");
+const mainRoutes = require("./server/routes/main");
+const passwordRoutes = require("./server/routes/password");
+
+// Setup DB
+const uri = process.env.MONGO_CONNECTION_URL;
+const mongoConfig = {
+  useNewUrlParser: true,
+};
+
+console.log("PROO: ", process.env.MONGO_USER_NAME);
+console.log("PROO: ", process.env.MONGO_PASSWORD);
+mongoose.connect(uri, mongoConfig);
+
+mongoose.connection.on("error", (err) => {
+  console.log("ERROR: ", err);
+  // If DB connection error - KIll App
+  process.exit(1);
+});
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -22,7 +39,7 @@ app.use(
   })
 );
 
-require("./js/auth/auth"); // Any code in there will be loaded and ran
+require("./server/auth/auth"); // Any code in there will be loaded and ran
 // Passport straetches are avail
 
 // Setup routes
@@ -39,6 +56,9 @@ app.use((err, req, res) => {
   res.status(err.status || 500).json({ message: "500", status: 500 });
 });
 
-app.listen(port, () => {
-  console.log(`We are live! ${port}`);
+mongoose.connection.on("connected", () => {
+  console.log("COnnected to mongoo");
+  app.listen(port, () => {
+    console.log(`We are live! ${port}`);
+  });
 });

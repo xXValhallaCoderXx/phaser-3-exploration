@@ -14,7 +14,7 @@ router.get("/status", (req, res) => {
 router.post(
   "/signup",
   passport.authenticate("signup", { session: false }),
-  (req, res, next) => {
+  async (req, res, next) => {
     console.log("hiu");
     res.status(200).json({ message: "signup success", status: 200 });
   }

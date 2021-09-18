@@ -1,5 +1,6 @@
 const passport = require("passport");
 const localStrategy = require("passport-local");
+const UserModel = require("../models/UserModel");
 
 // Handle registrations
 passport.use(
@@ -10,15 +11,13 @@ passport.use(
       passwordField: "password",
       passReqToCallback: true, // Add context of request
     },
-    (req, email, password, done) => {
-      console.log("EMAIL: ", email, password);
-      console.log("BODY: ", req.body);
-
-      const { username } = req.body;
-      if (username && username !== "error") {
-        return done(null, { name: "joe" });
-      } else {
-        return done(new Error("Invalid user"));
+    async (req, email, password, done) => {
+      try {
+        const { username } = req.body;
+        const user = await UserModel.create({ email, password, username });
+        return done(null, user);
+      } catch (error) {
+        return done(error);
       }
     }
   )

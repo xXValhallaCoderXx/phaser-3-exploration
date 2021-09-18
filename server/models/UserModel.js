@@ -16,7 +16,7 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
-  resetTokwn: {
+  resetToken: {
     type: String,
   },
   resetTokenExp: {
@@ -25,8 +25,8 @@ const UserSchema = new Schema({
 });
 
 UserSchema.pre("save", async function (next) {
-  // Conext of this is the user
-  const hash = await bcrypt.has(this.password, 10);
+  // Conext of this is the hash
+  const hash = await bcrypt.hash(this.password, 10);
   this.password = hash;
   next();
 });

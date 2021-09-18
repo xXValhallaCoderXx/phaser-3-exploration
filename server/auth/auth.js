@@ -1,22 +1,23 @@
 const passport = require("passport");
 const localStrategy = require("passport-local");
+const jwtStrategy = require("passport-jwt");
 const UserModel = require("../models/UserModel");
 
-// Handle registrations
 passport.use(
   "signup",
   new localStrategy.Strategy(
     {
       usernameField: "email",
       passwordField: "password",
-      passReqToCallback: true, // Add context of request
+      passReqToCallback: true,
     },
-    async (req, email, password, done) => {
+    async (request, email, password, done) => {
       try {
-        const { username } = req.body;
+        const { username } = request.body;
         const user = await UserModel.create({ email, password, username });
         return done(null, user);
       } catch (error) {
+        console.log("fdd", error);
         return done(error);
       }
     }
@@ -32,15 +33,44 @@ passport.use(
       usernameField: "email",
       passwordField: "password",
     },
-    (email, password, done) => {
-      if (email !== "joe@test.com") {
-        return done(new Error(" user mot nofund"));
+    async (email, password, done) => {
+      try {
+        const user = await UserModel.findOne({ email });
+        if (!user) {
+          return done(new Error("user not found"), false);
+        }
+        const valid = await user.isValidPassword(password);
+        if (!valid) {
+          return done(new Error("invalid pass"), false);
+        }
+        return done(null, user);
+      } catch (err) {
+        return done(error);
       }
-      if (password !== "test") {
-        return done(new Error(" passowrd mot nofund"));
-      }
+    }
+  )
+);
 
-      return done(null, { name: "joe" });
+// Verify
+passport.use(
+  new jwtStrategy.Strategy(
+    {
+      secretOrKey: process.env.JWT_SECRET,
+      jwtFromRequest: (req) => {
+        // Get req object
+        let token = null;
+        if (req && req.cookies) {
+          token = req.cookies.jwt;
+        }
+        return token;
+      },
+    },
+    async (token, done) => {
+      try {
+        return done(null, token.user);
+      } catch (err) {
+        return done(error);
+      }
     }
   )
 );

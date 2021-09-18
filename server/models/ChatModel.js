@@ -2,17 +2,16 @@ const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
 
-const EmailSchema = new Schema({
+const ChatSchema = new Schema({
   email: {
     type: String,
     required: true,
-    unique: true,
   },
-  password: {
+  message: {
     type: String,
     required: true,
   },
 });
 
-const ChatModel = mongoose.model("chat", EmailSchema);
+const ChatModel = mongoose.model("chat", ChatSchema);
 module.exports = ChatModel;

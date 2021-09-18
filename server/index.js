@@ -6,8 +6,8 @@ const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 
-const mainRoutes = require("./server/routes/main");
-const passwordRoutes = require("./server/routes/password");
+const mainRoutes = require("./routes/main");
+const passwordRoutes = require("./routes/password");
 
 // Setup DB
 const uri = process.env.MONGO_CONNECTION_URL;
@@ -39,7 +39,7 @@ app.use(
   })
 );
 
-require("./server/auth/auth"); // Any code in there will be loaded and ran
+require("./auth/auth"); // Any code in there will be loaded and ran
 // Passport straetches are avail
 
 // Setup routes

@@ -3,6 +3,7 @@ require("dotenv").config();
 const cors = require("cors");
 const express = require("express");
 const passport = require("passport");
+const path = require("path");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
@@ -41,6 +42,21 @@ app.use(
 
 require("./auth/auth"); // Any code in there will be loaded and ran
 // Passport straetches are avail
+
+app.get(
+  "/game.html",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    console.log("REQ: ", req);
+    res.status(200).json(req.user);
+  }
+);
+
+app.use(express.static(path.resolve(__dirname, "../client")));
+
+app.get("/", (req, res) => {
+  res.send(path.resolve(__dirname, "../client/index.html"));
+});
 
 // Setup routes
 app.use("/", mainRoutes);

@@ -59,7 +59,9 @@ router.post("/forgot-password", async (req, res) => {
     template: "forgot-password",
     subject: "MMORGP Password Recovery",
     context: {
-      url: `http://localhost:${process.env.PORT || 3000}?token=${token}`,
+      url: `http://localhost:${
+        process.env.PORT || 3000
+      }/reset-password.html?token=${token}`,
       name: user.username,
     },
   };
@@ -73,8 +75,8 @@ router.post("/reset-password", async (req, res, next) => {
   if (
     !req.body.token ||
     !req.body.password ||
-    !req.body.verifiedPassword ||
-    req.body.password !== req.body.verifiedPassword
+    !req.body.verifyPassword ||
+    req.body.password !== req.body.verifyPassword
   ) {
     res.status(400).json({ message: "passwords do not match", status: 400 });
     return;

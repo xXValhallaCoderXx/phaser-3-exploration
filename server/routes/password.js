@@ -36,6 +36,7 @@ router.post("/forgot-password", async (req, res) => {
   const { email: userEmail } = req.body;
 
   const user = await UserModel.findOne({ email: userEmail });
+  console.log("USER: ", user);
   if (!user) {
     res.status(400).json({ message: "invalid email", status: 400 });
     return;
@@ -59,13 +60,11 @@ router.post("/forgot-password", async (req, res) => {
     template: "forgot-password",
     subject: "MMORGP Password Recovery",
     context: {
-      url: `http://localhost:${
-        process.env.PORT || 3000
-      }/reset-password.html?token=${token}`,
+      url: `http://localhost:${3000}/reset-password.html?token=${token}`,
       name: user.username,
     },
   };
-
+  console.log("EMAIL: ", emailOptions);
   await smtpTransport.sendMail(emailOptions);
   res.status(200).json({ message: `Email sent to your addres!`, status: 200 });
 });

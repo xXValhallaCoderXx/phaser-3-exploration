@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Card, Button, Input, FormField, FormLabel } from "shared/components";
 
-const SignInContainer = () => {
+const ForgotPasswordContainer = () => {
   const {
     register,
     handleSubmit,
@@ -16,18 +16,18 @@ const SignInContainer = () => {
   const [error, setError] = useState("");
   const onSubmit = async (data) => {
     const res = await apiCall({
-      url: "http://localhost:4000/login",
+      url: "http://localhost:4000/forgot-password",
       method: "POST",
       data,
     });
-
+    console.log("WHAT IS: ", res);
     if (res.status === 500) {
       setError(res.error);
     } else if (res.status === 200) {
       setSuccess(true);
-      setTimeout(() => {
-        history.push("/game");
-      }, 1500);
+      // setTimeout(() => {
+      //   history.push("/game");
+      // }, 1500);
     }
   };
 
@@ -39,23 +39,17 @@ const SignInContainer = () => {
             <FormLabel>Email</FormLabel>
             <Input {...register("email", { required: "Email is required" })} />
           </FormField>
-          <div style={{ height: 20 }} />
-          <FormField error={errors?.password?.message}>
-            <FormLabel>Password</FormLabel>
-            <Input
-              {...register("password", { required: "Password is required" })}
-            />
-          </FormField>
+
           <ActionContainer>
             {error && (
               <ErrorLabel className="nes-text is-error">{error}</ErrorLabel>
             )}
             {success && (
               <ErrorLabel className="nes-text is-success">
-                Login success!
+                Email has been submit!
               </ErrorLabel>
             )}
-            <Button type="submit">Sign In</Button>
+            <Button type="submit">Send Email!</Button>
           </ActionContainer>
         </form>
       </Card>
@@ -84,4 +78,4 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
-export default SignInContainer;
+export default ForgotPasswordContainer;

@@ -1,13 +1,16 @@
 import styled from "styled-components";
 
-const FormField = ({ children, className, ...rest }) => {
+const FormField = ({ children, className, error, ...rest }) => {
   return (
-    <Styled {...rest} className={`nes-field ${className}`}>
+    <div {...rest} className={`nes-field ${className}`}>
       {children}
-    </Styled>
+      {error && <ErrorLabel className="nes-text is-error">{error}</ErrorLabel>}
+    </div>
   );
 };
 
-const Styled = styled.div``;
+const ErrorLabel = styled.span`
+  font-size: 12px;
+`;
 
 export default FormField;

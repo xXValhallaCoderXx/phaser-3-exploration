@@ -1,12 +1,12 @@
 import styled from "styled-components";
 
-const ButtonContainer = ({ variant, children }) => {
+const ButtonContainer = ({ variant, children, ...rest }) => {
   const VARIANT = {
     primary: "primary",
   };
 
   return (
-    <Styled className={`nes-btn is-${VARIANT[variant] ?? "primary"}`}>
+    <Styled {...rest} className={`nes-btn is-${VARIANT[variant] ?? "primary"}`}>
       {children}
     </Styled>
   );

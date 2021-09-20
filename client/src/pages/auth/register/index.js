@@ -16,7 +16,7 @@ const SignInContainer = () => {
   const [error, setError] = useState("");
   const onSubmit = async (data) => {
     const res = await apiCall({
-      url: "http://localhost:4000/login",
+      url: "http://localhost:4000/signup",
       method: "POST",
       data,
     });
@@ -35,6 +35,13 @@ const SignInContainer = () => {
     <Container>
       <Card>
         <form onSubmit={handleSubmit(onSubmit)}>
+          <FormField error={errors?.username?.message}>
+            <FormLabel>Username</FormLabel>
+            <Input
+              {...register("username", { required: "Username is required" })}
+            />
+          </FormField>
+          <div style={{ height: 20 }} />
           <FormField error={errors?.email?.message}>
             <FormLabel>Email</FormLabel>
             <Input {...register("email", { required: "Email is required" })} />
@@ -48,14 +55,16 @@ const SignInContainer = () => {
           </FormField>
           <ActionContainer>
             {error && (
-              <ErrorLabel className="nes-text is-error">{error}</ErrorLabel>
+              <FeedbackLabel className="nes-text is-error">
+                {error}
+              </FeedbackLabel>
             )}
             {success && (
-              <ErrorLabel className="nes-text is-success">
-                Login success!
-              </ErrorLabel>
+              <FeedbackLabel className="nes-text is-success">
+                Sign Successful!!
+              </FeedbackLabel>
             )}
-            <Button type="submit">Sign In</Button>
+            <Button type="submit">Register</Button>
           </ActionContainer>
         </form>
       </Card>
@@ -63,7 +72,7 @@ const SignInContainer = () => {
   );
 };
 
-const ErrorLabel = styled.span`
+const FeedbackLabel = styled.span`
   font-size: 12px;
   text-align: center;
   margin-bottom: 10px;

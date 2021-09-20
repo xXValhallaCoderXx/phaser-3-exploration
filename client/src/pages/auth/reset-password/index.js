@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Card, Button, Input, FormField, FormLabel } from "shared/components";
 
-const SignInContainer = () => {
+const ResetPasswordContainer = () => {
   const {
     register,
     handleSubmit,
@@ -16,9 +16,12 @@ const SignInContainer = () => {
   const [error, setError] = useState("");
   const onSubmit = async (data) => {
     const res = await apiCall({
-      url: "http://localhost:4000/login",
+      url: "http://localhost:4000/reset-password",
       method: "POST",
-      data,
+      data: {
+        ...data,
+        token: document.location.href.split("token=")[1],
+      },
     });
 
     if (res.status === 500) {
@@ -26,11 +29,10 @@ const SignInContainer = () => {
     } else if (res.status === 200) {
       setSuccess(true);
       setTimeout(() => {
-        history.push("/game");
+        history.push("/");
       }, 1500);
     }
   };
-
   return (
     <Container>
       <Card>
@@ -39,23 +41,31 @@ const SignInContainer = () => {
             <FormLabel>Email</FormLabel>
             <Input {...register("email", { required: "Email is required" })} />
           </FormField>
-          <div style={{ height: 20 }} />
           <FormField error={errors?.password?.message}>
             <FormLabel>Password</FormLabel>
             <Input
               {...register("password", { required: "Password is required" })}
             />
           </FormField>
+          <FormField error={errors?.verifyPassword?.message}>
+            <FormLabel>Confirm Password</FormLabel>
+            <Input
+              {...register("verifyPassword", {
+                required: "Password is required",
+              })}
+            />
+          </FormField>
+
           <ActionContainer>
             {error && (
               <ErrorLabel className="nes-text is-error">{error}</ErrorLabel>
             )}
             {success && (
               <ErrorLabel className="nes-text is-success">
-                Login success!
+                Password has been updated!
               </ErrorLabel>
             )}
-            <Button type="submit">Sign In</Button>
+            <Button type="submit">Update Password</Button>
           </ActionContainer>
         </form>
       </Card>
@@ -84,4 +94,4 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
-export default SignInContainer;
+export default ResetPasswordContainer;

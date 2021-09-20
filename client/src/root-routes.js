@@ -1,13 +1,13 @@
 import { Route, Switch } from "react-router-dom";
 import SignInContainer from "./pages/auth/sign-in";
-import LoginContainer from "./pages/auth/login";
+import LoginContainer from "./pages/auth/sign-up";
 const RootRoutes = () => {
   return (
     <Switch>
-      <Route to="/login">
+      {/* <Route exact to="/login">
         <LoginContainer />
-      </Route>
-      <Route to="/">
+      </Route> */}
+      <Route exact to="/">
         <SignInContainer />
       </Route>
     </Switch>

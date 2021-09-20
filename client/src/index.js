@@ -6,6 +6,17 @@ import "./index.css";
 import { store } from "./config/store";
 import RootRoutes from "./root-routes";
 import reportWebVitals from "./reportWebVitals";
+import Phaser from "phaser";
+import PhaserCore from "pages/game/scene";
+const config = {
+  type: Phaser.AUTO,
+  mode: Phaser.Scale.FIT,
+  parent: "phaser",
+
+  scene: PhaserCore,
+};
+
+new Phaser.Game(config);
 
 ReactDOM.render(
   <React.StrictMode>

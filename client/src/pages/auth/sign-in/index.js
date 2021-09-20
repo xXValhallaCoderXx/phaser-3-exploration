@@ -33,6 +33,8 @@ const SignInContainer = () => {
 
   return (
     <Container>
+      <MainTitle className="nes-text is-success">Crypto Quest</MainTitle>
+      <FormTitle>Login</FormTitle>
       <Card>
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormField error={errors?.email?.message}>
@@ -62,6 +64,14 @@ const SignInContainer = () => {
     </Container>
   );
 };
+
+const MainTitle = styled.h1`
+  margin-bottom: 50px;
+`;
+
+const FormTitle = styled.h2`
+  margin-bottom: 20px;
+`;
 
 const ErrorLabel = styled.span`
   font-size: 12px;

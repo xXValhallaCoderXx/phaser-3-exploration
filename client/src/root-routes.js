@@ -4,25 +4,29 @@ import Register from "./pages/auth/register";
 import Game from "./pages/game";
 import ForgotPassword from "./pages/auth/forgot-password";
 import ResetPassword from "./pages/auth/reset-password";
+import NavigationHeader from "shared/components/navigation-header/navigation-header";
 const RootRoutes = () => {
   return (
-    <Switch>
-      <Route exact path="/">
-        <SignInContainer />
-      </Route>
-      <Route path="/register">
-        <Register />
-      </Route>
-      <Route path="/forgot-password">
-        <ForgotPassword />
-      </Route>
-      <Route path="/reset-password">
-        <ResetPassword />
-      </Route>
-      <Route path="/game">
-        <Game />
-      </Route>
-    </Switch>
+    <>
+      <NavigationHeader />
+      <Switch>
+        <Route exact path="/">
+          <SignInContainer />
+        </Route>
+        <Route path="/register">
+          <Register />
+        </Route>
+        <Route path="/forgot-password">
+          <ForgotPassword />
+        </Route>
+        <Route path="/reset-password">
+          <ResetPassword />
+        </Route>
+        <Route path="/game">
+          <Game />
+        </Route>
+      </Switch>
+    </>
   );
 };
 

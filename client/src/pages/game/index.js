@@ -1,11 +1,25 @@
+import { useEffect } from "react";
 import styled from "styled-components";
 import { Card, Button, Input, FormField, FormLabel } from "shared/components";
 
+import Phaser from "phaser";
+import PhaserCore from "pages/game/scene";
+
+const config = {
+  type: Phaser.AUTO,
+  mode: Phaser.Scale.FIT,
+  parent: "phaser",
+
+  scene: PhaserCore,
+};
+
 const GameContainer = () => {
+  useEffect(() => {
+    new Phaser.Game(config);
+  }, []);
   const onClick = () => {};
   return (
     <Container>
-      GAME
       <div style={{ position: "relative" }} className="phaser" id="phaser" />
     </Container>
   );

@@ -1,7 +1,6 @@
 import { useState } from "react";
 import styled from "styled-components";
 import { apiCall } from "shared/api";
-import { useHistory } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Card, Button, Input, FormField, FormLabel } from "shared/components";
 
@@ -11,7 +10,6 @@ const ForgotPasswordContainer = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const history = useHistory();
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const onSubmit = async (data) => {

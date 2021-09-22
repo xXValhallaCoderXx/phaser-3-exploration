@@ -4,15 +4,45 @@ import Chest from "game-core/classes/Chest";
 import Monster from "game-core/classes/Monster";
 import GameManager from "game-core/classes/game-manager/GameManager";
 import Map from "game-core/classes/Map";
+import SocketService from "shared/services/socket/socket-service";
+
 class GameScene extends Phaser.Scene {
   constructor() {
     super("Game");
+
+    this.socket = SocketService?.socket;
   }
 
   init() {
     // Launch instead of start will run scene in parallele - what ever scene active 1st is on bittom lauyet
     // Start will shut down current and switch to new
     this.scene.launch("Ui");
+
+    // List for socket events
+    this.socketListener();
+  }
+
+  socketListener() {
+    // Spawn player game objects
+    this.socket.on("currentPlayers", (players) => {
+      console.log("CUrrent players", players);
+      Object.keys(players).forEach((id) => {
+        if (players[id].id === this.socket.id) {
+          this.createPlayer(players[id], true);
+        } else {
+          this.createPlayer(players[id], false);
+        }
+      });
+    });
+    this.socket.on("currentMonsters", (monsters) => {
+      console.log("Current Mosnters", monsters);
+    });
+    this.socket.on("currentChests", (chests) => {
+      console.log("CUrent chests", chests);
+    });
+    this.socket.on("newPlayer", (player) => {
+      console.log("New Player Event", player);
+    });
   }
 
   preload() {}
@@ -24,7 +54,8 @@ class GameScene extends Phaser.Scene {
 
     this.createInput();
 
-    this.createGameManager();
+    //  this.createGameManager();
+    this.socket.emit("newPlayer");
   }
   update() {
     if (this.player) {
@@ -56,7 +87,7 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  createPlayer(player) {
+  createPlayer(player, mainPlayer) {
     this.player = new PlayerContainer(
       this,
       player.x * 2,
@@ -66,7 +97,8 @@ class GameScene extends Phaser.Scene {
       player.health,
       player.maxHealth,
       player.id,
-      this.playerAttackAudio
+      this.playerAttackAudio,
+      mainPlayer
     ); // NEW
   }
 

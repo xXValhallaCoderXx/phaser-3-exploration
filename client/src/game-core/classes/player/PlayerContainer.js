@@ -1,7 +1,18 @@
 import Phaser from "phaser";
 import Player from "./Player";
 class PlayerContainer extends Phaser.GameObjects.Container {
-  constructor(scene, x, y, key, frame, health, maxHealth, id, attackAudio) {
+  constructor(
+    scene,
+    x,
+    y,
+    key,
+    frame,
+    health,
+    maxHealth,
+    id,
+    attackAudio,
+    mainPlayer
+  ) {
     super(scene, x, y);
 
     //store a reference to the scene
@@ -15,6 +26,7 @@ class PlayerContainer extends Phaser.GameObjects.Container {
     this.maxHealth = maxHealth;
     this.id = id;
     this.attackAudio = attackAudio;
+    this.mainPlayer = mainPlayer;
     // set size on container
     // by default container wont have size till objs added
     this.setSize(64, 64);
@@ -27,7 +39,9 @@ class PlayerContainer extends Phaser.GameObjects.Container {
     // add the player to our existing scene
     this.scene.add.existing(this);
 
-    this.scene.cameras.main.startFollow(this);
+    if (this.mainPlayer) {
+      this.scene.cameras.main.startFollow(this);
+    }
 
     // create player
     // Game object is relative to container

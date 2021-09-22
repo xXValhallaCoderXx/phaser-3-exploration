@@ -14,6 +14,7 @@ const cookieParser = require("cookie-parser");
 const mainRoutes = require("./routes/main");
 const passwordRoutes = require("./routes/password");
 const secureRoutes = require("./routes/secure");
+const GameManager = require("./game-manager/GameManager");
 
 // Setup DB
 const uri = process.env.MONGO_CONNECTION_URL;
@@ -30,7 +31,14 @@ mongoose.connection.on("error", (err) => {
 });
 
 const app = express();
-const port = process.env.PORT || 3000;
+
+const server = require("http").createServer(app);
+const io = require("socket.io")(server);
+
+const gameManager = new GameManager(io);
+gameManager.setup();
+
+const port = process.env.PORT || 4000;
 // Dfine BP Before routes - update express settings
 app.use(bodyParser.urlencoded({ extended: false })); // Prase application/x-www-form-urlencoded data
 app.use(bodyParser.json()); // Parse application/json
@@ -81,7 +89,7 @@ app.use((error, request, response, next) => {
 
 mongoose.connection.on("connected", () => {
   console.log("Connected to mongoo");
-  app.listen(port, () => {
+  server.listen(port, () => {
     console.log(`We are live on! ${port}`);
   });
 });

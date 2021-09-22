@@ -5,6 +5,7 @@ import BootScene from "game-core/scenes/BootScene";
 import TitleScene from "game-core/scenes/TitleScene";
 import GameScene from "game-core/scenes/GameScene";
 import UiScene from "game-core/scenes/UiScene";
+
 // type: Phaser.AUTO,
 // mode: Phaser.Scale.FIT,
 

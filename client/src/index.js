@@ -6,6 +6,9 @@ import "./index.css";
 import { store } from "./config/store";
 import RootRoutes from "./root-routes";
 import reportWebVitals from "./reportWebVitals";
+import SocketService from "./shared/services/socket/socket-service";
+
+console.log("ALAL: ", SocketService.socket);
 
 ReactDOM.render(
   <React.StrictMode>

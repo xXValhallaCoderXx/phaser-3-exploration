@@ -20,7 +20,7 @@ export const apiCall = async ({ method, url, data = {} }) => {
     });
     return res;
   } catch (err) {
-    const { data, status } = err.response;
+    const { data } = err.response;
 
     return data;
   }

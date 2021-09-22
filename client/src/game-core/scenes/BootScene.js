@@ -11,7 +11,6 @@ import itemSpriteSheet from "shared/images/items.png";
 import charSpriteSheet from "shared/images/characters.png";
 import monsterSpriteSheet from "shared/images/monsters.png";
 import tileMap from "shared/level/large_level.json";
-
 class BootScene extends Phaser.Scene {
   constructor() {
     super("Boot");
@@ -54,7 +53,7 @@ class BootScene extends Phaser.Scene {
     this.load.audio("playerDeath", [playerDeath]);
   }
   create() {
-    this.scene.start("Title");
+    this.scene.start("Game");
   }
 
   loadTileMap() {

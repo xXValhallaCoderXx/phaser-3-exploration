@@ -8,3 +8,5 @@ class ChestModel {
     this.gold = gold;
   }
 }
+
+export default ChestModel;

@@ -1,23 +1,42 @@
-import { useEffect } from "react";
-import styled from "styled-components";
-import { Card, Button, Input, FormField, FormLabel } from "shared/components";
-
+import { useRef, useEffect } from "react";
 import Phaser from "phaser";
-import PhaserCore from "pages/game/scene";
+import styled from "styled-components";
+import BootScene from "game-core/scenes/BootScene";
+import TitleScene from "game-core/scenes/TitleScene";
+import GameScene from "game-core/scenes/GameScene";
+import UiScene from "game-core/scenes/UiScene";
+// type: Phaser.AUTO,
+// mode: Phaser.Scale.FIT,
 
-const config = {
+let config = {
   type: Phaser.AUTO,
-  mode: Phaser.Scale.FIT,
+  width: 800,
+  height: 600,
   parent: "phaser",
-
-  scene: PhaserCore,
+  scale: {
+    mode: Phaser.Scale.FIT,
+  },
+  scene: [BootScene, TitleScene, GameScene, UiScene],
+  title: "MMO",
+  physics: {
+    default: "arcade",
+    arcade: {
+      debug: true,
+      gravity: {
+        y: 0,
+      },
+    },
+  },
+  pixelArt: true,
+  roundPixels: true, // Sometimes when sclaing it may be a float number
 };
 
 const GameContainer = () => {
+  const phaserGame = useRef({});
   useEffect(() => {
-    new Phaser.Game(config);
+    phaserGame.current = new Phaser.Game(config);
+    return () => phaserGame.current.destroy(true);
   }, []);
-  const onClick = () => {};
   return (
     <Container>
       <div style={{ position: "relative" }} className="phaser" id="phaser" />

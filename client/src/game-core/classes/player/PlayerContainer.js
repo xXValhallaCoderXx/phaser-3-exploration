@@ -154,6 +154,10 @@ class PlayerContainer extends Phaser.GameObjects.Container {
 
     this.updateHealthBar();
   }
+
+  updateFlipX() {
+    this.player.flipX = this.flipX;
+  }
 }
 
 const DIRECTION = {

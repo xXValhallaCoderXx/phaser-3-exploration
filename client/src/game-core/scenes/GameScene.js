@@ -29,6 +29,7 @@ class GameScene extends Phaser.Scene {
       Object.keys(players).forEach((id) => {
         if (players[id].id === this.socket.id) {
           this.createPlayer(players[id], true);
+          this.addCollisions();
         } else {
           this.createPlayer(players[id], false);
         }
@@ -40,8 +41,20 @@ class GameScene extends Phaser.Scene {
     this.socket.on("currentChests", (chests) => {
       console.log("CUrent chests", chests);
     });
-    this.socket.on("newPlayer", (player) => {
+    this.socket.on("spawnPlayer", (player) => {
       console.log("New Player Event", player);
+      this.createPlayer(player, false);
+    });
+
+    this.socket.on("playerMoved", (player) => {
+      this.otherPlayers.getChildren().forEach((otherPlayer) => {
+        if (player.id === otherPlayer.id) {
+          otherPlayer.flipX = player.flipX;
+          otherPlayer.setPosition(player.x, player.y);
+          otherPlayer.updateHealth();
+          otherPlayer.updateFlipX();
+        }
+      });
     });
   }
 
@@ -61,6 +74,27 @@ class GameScene extends Phaser.Scene {
     if (this.player) {
       // On classes update method is not run automatically so we are calling it
       this.player.update(this.cursors);
+    }
+
+    // Check if current pos or flip x is different to rec to see if player moved
+    if (this.player) {
+      // emit movement to server
+      const { x, y, flipX } = this.player;
+      if (
+        this.player.oldPosition &&
+        (x !== this.player.oldPosition.x ||
+          y !== this.player.oldPosition.y ||
+          flipX !== this.player.oldPosition.flipX)
+      ) {
+        this.socket.emit("playerMovement", { x, y, flipX });
+      }
+
+      // Save old position
+      this.player.oldPosition = {
+        x: this.player?.x ?? 0,
+        y: this.player?.y ?? 0,
+        flipX: this.player?.flipX,
+      };
     }
   }
 
@@ -87,19 +121,25 @@ class GameScene extends Phaser.Scene {
     });
   }
 
-  createPlayer(player, mainPlayer) {
-    this.player = new PlayerContainer(
+  createPlayer(playerObject, mainPlayer) {
+    const newPlayerGameObject = new PlayerContainer(
       this,
-      player.x * 2,
-      player.y * 2,
+      playerObject.x * 2,
+      playerObject.y * 2,
       "characters",
       0,
-      player.health,
-      player.maxHealth,
-      player.id,
+      playerObject.health,
+      playerObject.maxHealth,
+      playerObject.id,
       this.playerAttackAudio,
       mainPlayer
     ); // NEW
+
+    if (!mainPlayer) {
+      this.otherPlayers.add(newPlayerGameObject);
+    } else {
+      this.player = newPlayerGameObject;
+    }
   }
 
   createGroups() {
@@ -122,6 +162,9 @@ class GameScene extends Phaser.Scene {
     //   // SPawn chest
     //   this.spawnChest();
     // }
+
+    // Other plays
+    this.otherPlayers = this.physics.add.group();
   }
 
   spawnChest(chestObj) {
@@ -223,10 +266,10 @@ class GameScene extends Phaser.Scene {
   }
 
   createGameManager() {
-    this.events.on("spawnPlayer", (player) => {
-      this.createPlayer(player);
-      this.addCollisions();
-    });
+    // this.events.on("spawnPlayer", (player) => {
+    //   this.createPlayer(player);
+    //   this.addCollisions();
+    // });
     this.events.on("chestSpawned", (chest) => {
       this.spawnChest(chest);
     });

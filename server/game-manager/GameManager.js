@@ -59,7 +59,18 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
         socket.emit("currentChests", this.chests);
 
         // inform other players
-        socket.broadcast.emit("newPlayer", this.players[socket.id]);
+        socket.broadcast.emit("spawnPlayer", this.players[socket.id]);
+      });
+
+      socket.on("playerMovement", (playerData) => {
+        if (this.players[socket.id]) {
+          this.players[socket.id].x = playerData.x;
+          this.players[socket.id].y = playerData.y;
+          this.players[socket.id].flipX = playerData.flipX;
+
+          // Emit messagge to all players
+          this.io.emit("playerMoved", this.players[socket.id]);
+        }
       });
     });
   }

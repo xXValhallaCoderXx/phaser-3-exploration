@@ -12,15 +12,18 @@ const SignInContainer = () => {
     formState: { errors },
   } = useForm();
   const history = useHistory();
+  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
   const onSubmit = async (data) => {
+    setLoading(true);
+    setError("");
     const res = await apiCall({
       url: "http://localhost:4000/login",
       method: "POST",
       data,
     });
-
+    setLoading(false);
     if (res.status === 500) {
       setError(res.error);
     } else if (res.status === 200) {
@@ -49,13 +52,10 @@ const SignInContainer = () => {
             />
           </FormField>
           <ActionContainer>
-            {error && (
-              <ErrorLabel className="nes-text is-error">{error}</ErrorLabel>
-            )}
+            {loading && <Label className="nes-text is-success">Loading</Label>}
+            {error && <Label className="nes-text is-error">{error}</Label>}
             {success && (
-              <ErrorLabel className="nes-text is-success">
-                Login success!
-              </ErrorLabel>
+              <Label className="nes-text is-success">Login success!</Label>
             )}
             <Button type="submit">Sign In</Button>
           </ActionContainer>
@@ -73,7 +73,7 @@ const FormTitle = styled.h2`
   margin-bottom: 20px;
 `;
 
-const ErrorLabel = styled.span`
+const Label = styled.span`
   font-size: 12px;
   text-align: center;
   margin-bottom: 10px;

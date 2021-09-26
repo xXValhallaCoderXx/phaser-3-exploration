@@ -3,7 +3,7 @@ import { Link as RouterLink, useLocation } from "react-router-dom";
 const NavigationHeader = ({ isAuthenticated = false }) => {
   const location = useLocation();
 
-  if (location.pathname === "/") {
+  if (location.pathname.includes("auth")) {
     return null;
   }
   return (

@@ -36,10 +36,14 @@ class GameScene extends Phaser.Scene {
       });
     });
     this.socket.on("currentMonsters", (monsters) => {
-      console.log("Current Mosnters", monsters);
+      Object.keys(monsters).forEach((id) => {
+        this.spawnMonster(monsters[id]);
+      });
     });
     this.socket.on("currentChests", (chests) => {
-      console.log("CUrent chests", chests);
+      Object.keys(chests).forEach((id) => {
+        this.spawnChest(chests[id]);
+      });
     });
     this.socket.on("spawnPlayer", (player) => {
       console.log("New Player Event", player);
@@ -61,6 +65,44 @@ class GameScene extends Phaser.Scene {
           }
         }
       });
+    });
+
+    this.socket.on("chestSpawned", (chest) => {
+      this.spawnChest(chest);
+    });
+    this.socket.on("monsterSpawned", (monster) => {
+      this.spawnMonster(monster);
+    });
+
+    this.socket.on("chestRemoved", (chestID) => {
+      this.chests.getChildren().forEach((chest) => {
+        if (chest.id === chestID) {
+          chest.makeInactive();
+        }
+      });
+    });
+
+    this.socket.on("monsterRemoved", (monsterID) => {
+      this.monsters.getChildren().forEach((monster) => {
+        if (monster.id === monsterID) {
+          monster.makeInactive();
+          this.monsterDeathAudio.play();
+        }
+      });
+    });
+
+    this.socket.on("monsterMovement", (monsters) => {
+      this.monsters.getChildren().forEach((monster) => {
+        Object.keys(monsters).forEach((monsterID) => {
+          if (monster.id === monsterID) {
+            this.physics.moveToObject(monster, monsters[monsterID], 40);
+          }
+        });
+      });
+    });
+
+    this.socket.on("updateScore", (goldAmount) => {
+      this.events.emit("updateScore", goldAmount);
     });
   }
 
@@ -91,7 +133,7 @@ class GameScene extends Phaser.Scene {
         (x !== this.player.oldPosition.x ||
           y !== this.player.oldPosition.y ||
           flipX !== this.player.oldPosition.flipX ||
-          playerAttacking == !this.player.oldPosition.playerAttacking)
+          playerAttacking !== this.player.oldPosition.playerAttacking)
       ) {
         this.socket.emit("playerMovement", {
           x,
@@ -239,7 +281,6 @@ class GameScene extends Phaser.Scene {
   }
 
   addCollisions() {
-    console.log("WJA TI: ", this);
     this.physics.add.collider(this.player, this.map.blockedLayer);
     this.physics.add.overlap(
       this.player,
@@ -270,10 +311,10 @@ class GameScene extends Phaser.Scene {
     chest.makeInactive();
     this.goldPickupSound.play();
 
-    this.events.emit("updateScore", this.score);
+    this.socket.emit("updateScore", this.score);
     // Delayed call so the chest if it spawns in same location as player its not instantly collected
     // this.time.delayedCall(1000, this.spawnChest, [], this);
-    this.events.emit("pickupChest", chest.id, player.id);
+    this.socket.emit("pickupChest", chest.id);
   }
 
   createMap() {
@@ -285,45 +326,12 @@ class GameScene extends Phaser.Scene {
     //   this.createPlayer(player);
     //   this.addCollisions();
     // });
-    this.events.on("chestSpawned", (chest) => {
-      this.spawnChest(chest);
-    });
-    this.events.on("monsterSpawned", (monster) => {
-      this.spawnMonster(monster);
-    });
-
-    this.events.on("monsterRemoved", (monsterID) => {
-      this.monsters.getChildren().forEach((monster) => {
-        if (monster.id === monsterID) {
-          monster.makeInactive();
-          this.monsterDeathAudio.play();
-        }
-      });
-    });
-
-    this.events.on("chestRemoved", (chestID) => {
-      this.chests.getChildren().forEach((chest) => {
-        if (chest.id === chestID) {
-          chest.makeInactive();
-        }
-      });
-    });
 
     this.events.on("updateMonsterHealth", (monsterID, health) => {
       this.monsters.getChildren().forEach((monster) => {
         if (monster.id === monsterID) {
           monster.updateHealth(health);
         }
-      });
-    });
-
-    this.events.on("monsterMovement", (monsters) => {
-      this.monsters.getChildren().forEach((monster) => {
-        Object.keys(monsters).forEach((monsterID) => {
-          if (monster.id === monsterID) {
-            this.physics.moveToObject(monster, monsters[monsterID], 40);
-          }
-        });
       });
     });
 

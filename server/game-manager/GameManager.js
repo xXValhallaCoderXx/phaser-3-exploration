@@ -1,5 +1,8 @@
 const PlayerModel = require("./PlayerModel");
+
 const levelData = require("../../client/src/shared/level/large_level.json");
+const { SPAWN_TYPE } = require("../utils");
+const Spawner = require("./Spawner");
 class GameManager {
   constructor(io) {
     this.io = io;
@@ -33,7 +36,7 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
 */
   parseMapData() {
     this.levelData = levelData;
-    console.log("level data: ", this.levelData);
+
     this.levelData.layers.forEach((layer) => {
       if (layer.name === "player_locations") {
         layer.objects.forEach((obj) => {
@@ -98,12 +101,87 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
           this.io.emit("playerMoved", this.players[socket.id]);
         }
       });
+
+      socket.on("pickupChest", (chestID) => {
+        // Update spawner
+        if (this.chests[chestID]) {
+          const { gold } = this.chests[chestID];
+          this.players[socket.id].updateGold(gold);
+          // Update score
+          socket.emit("updateScore", this.players[socket.id].gold);
+          // Check if exists in object array
+          // Get its spawnerID
+          // In spawner ID call remove object
+          this.spawners[this.chests[chestID].spawnerId].removeObject(chestID);
+        }
+      });
     });
   }
-  setupSpawners() {}
+  setupSpawners() {
+    // Create Spawn COnfig
+    const config = {
+      spawnInterval: 3000,
+      limit: 3,
+      spawnerType: SPAWN_TYPE.CHEST,
+      id: ``,
+    };
+    let spawner;
+
+    // Chest locations
+    Object.keys(this.chestLocations).forEach((key) => {
+      config.id = `chest-${key}`; // Create ID
+      // Create spawner
+      spawner = new Spawner(
+        config,
+        this.chestLocations[key],
+        this.addChest.bind(this),
+        this.deleteChest.bind(this)
+      );
+      // Add to spawners
+      this.spawners[spawner.id] = spawner;
+    });
+
+    Object.keys(this.monsterLocations).forEach((key) => {
+      config.id = `monster-${key}`;
+      config.spawnerType = SPAWN_TYPE.MONSTER;
+
+      spawner = new Spawner(
+        config,
+        this.monsterLocations[key],
+        this.addMonster.bind(this),
+        this.deleteMonster.bind(this),
+        this.moveMonsters.bind(this)
+      );
+      this.spawners[spawner.id] = spawner;
+    });
+  }
   spawnPlayer(playerId) {
     const player = new PlayerModel(playerId, this.playerLocations);
     this.players[playerId] = player;
+  }
+
+  addChest(id, chest) {
+    this.chests[id] = chest;
+    this.io.emit("chestSpawned", chest);
+  }
+
+  deleteChest(chestId) {
+    delete this.chests[chestId];
+    this.io.emit("chestRemoved", chestId);
+  }
+
+  addMonster(id, monster) {
+    this.monsters[id] = monster;
+    this.io.emit("monsterSpawned", monster);
+  }
+
+  deleteMonster(id) {
+    delete this.monsters[id];
+    this.io.emit("monsterRemoved", id);
+  }
+
+  moveMonsters() {
+    this.io.emit("monsterMovement", this.monsters);
   }
 }
 

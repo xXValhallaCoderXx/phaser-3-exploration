@@ -32,8 +32,10 @@ mongoose.connection.on("error", (err) => {
 
 const app = express();
 
-const server = require("http").createServer(app);
-const io = require("socket.io")(server);
+const http = require("http").Server(app);
+
+// const server = require("http").createServer(app);
+const io = require("socket.io")(http);
 
 const gameManager = new GameManager(io);
 gameManager.setup();
@@ -89,7 +91,7 @@ app.use((error, request, response, next) => {
 
 mongoose.connection.on("connected", () => {
   console.log("Connected to mongoo");
-  server.listen(port, () => {
+  http.listen(port, () => {
     console.log(`We are live on! ${port}`);
   });
 });

@@ -161,9 +161,52 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
                 parseInt(-this.players[socket.id].gold / 2)
               );
               socket.emit("updateScore", this.players[socket.id].gold);
-              this.players[socket.id].respawn();
+              this.players[socket.id].respawn(this.players);
               this.io.emit("respawnPlayer", this.players[socket.id]);
             }
+          }
+        }
+      });
+
+      socket.on("attackedPlayer", (attackedPlayerId) => {
+        if (this.players[attackedPlayerId]) {
+          // Get info from attacked player
+          const attackedPlayer = this.players[attackedPlayerId];
+          const { gold } = attackedPlayer;
+
+          // Remove HP from attacked player
+          attackedPlayer.updateHealth(-1);
+          // CHeck HP and if dead give gold to player
+          if (attackedPlayer.health <= 0) {
+            // Get gold from layer
+            this.players[socket.id].updateGold(gold);
+            // Respanw attacked player
+
+            attackedPlayer.respawn(this.players);
+            this.io.emit("respawnPlayer", attackedPlayer);
+
+            // Send udate gold message to player
+            socket.emit("updateScore", this.players[socket.id].gold);
+
+            // REset attacked players gold
+            attackedPlayer.updateGold(-gold);
+            this.io
+              .to(`${attackedPlayerId}`)
+              .emit("updateScore", attackedPlayer.gold);
+
+            // GIve bonus HP to player that won
+            this.players[socket.id].updateHealth(2);
+            this.io.emit(
+              "updatePlayerHEalth",
+              socket.id,
+              this.players[socket.id].health
+            );
+          } else {
+            this.io.emit(
+              "updatePlyaerHealth",
+              attackedPlayerId,
+              attackedPlayer.health
+            );
           }
         }
       });
@@ -208,7 +251,11 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
     });
   }
   spawnPlayer(playerId) {
-    const player = new PlayerModel(playerId, this.playerLocations);
+    const player = new PlayerModel(
+      playerId,
+      this.playerLocations,
+      this.players
+    );
     this.players[playerId] = player;
   }
 

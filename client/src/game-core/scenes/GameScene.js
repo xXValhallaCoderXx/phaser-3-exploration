@@ -139,6 +139,14 @@ class GameScene extends Phaser.Scene {
         });
       }
     });
+
+    this.socket.on("playerDisconnect", (playerID) => {
+      this.otherPlayers.getChildren().forEach((player) => {
+        if (playerID === player.id) {
+          player.cleanUp();
+        }
+      });
+    });
   }
 
   preload() {}
@@ -331,6 +339,34 @@ class GameScene extends Phaser.Scene {
       null,
       this
     );
+    this.physics.add.collider(
+      this.otherPlayers,
+      this.player,
+      this.pvpCollider,
+      false,
+      this
+    );
+    // Check overlaps between weapons and other playe game objects
+    this.physics.add.overlap(
+      this.player.weapon,
+      this.otherPlayers,
+      this.weaponOverlapEnemy,
+      false,
+      this
+    );
+  }
+
+  pvpCollider(player, otherPlayer) {
+    this.player.body.setVelocity(0);
+    otherPlayer.body.setVelocity(0);
+  }
+
+  weaponOverlapEnemy(player, enemy) {
+    if (this.player.playerAttacking && !this.player.swordHit) {
+      this.player.swordHit = true;
+
+      this.socket.emit("attackedPlayer", enemy.id);
+    }
   }
 
   enemyOverlap(player, enemy) {

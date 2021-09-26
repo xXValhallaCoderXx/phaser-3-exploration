@@ -90,47 +90,44 @@ class PlayerContainer extends Phaser.GameObjects.Container {
   update(cursors) {
     this.body.setVelocity(0);
 
-    if (cursors.left.isDown) {
-      this.body.setVelocityX(-this.velocity);
-      this.currentDirection = DIRECTION.LEFT;
-      this.weapon.setPosition(-40, 0);
-      this.player.flipX = false;
-    } else if (cursors.right.isDown) {
-      this.body.setVelocityX(this.velocity);
-      this.currentDirection = DIRECTION.RIGHT;
-      this.weapon.setPosition(40, 0);
-      this.player.flipX = true;
-    }
+    if (this.mainPlayer) {
+      if (cursors.left.isDown) {
+        this.body.setVelocityX(-this.velocity);
+        this.currentDirection = DIRECTION.LEFT;
+        this.flipX = false;
+        this.player.flipX = false;
+      } else if (cursors.right.isDown) {
+        this.body.setVelocityX(this.velocity);
+        this.currentDirection = DIRECTION.RIGHT;
+        this.flipX = true;
+        this.player.flipX = true;
+      }
 
-    if (cursors.up.isDown) {
-      this.body.setVelocityY(-this.velocity);
-      this.currentDirection = DIRECTION.UP;
+      if (cursors.up.isDown) {
+        this.body.setVelocityY(-this.velocity);
+        this.currentDirection = DIRECTION.UP;
+      } else if (cursors.down.isDown) {
+        this.body.setVelocityY(this.velocity);
+
+        this.currentDirection = DIRECTION.DOWN;
+      }
+
+      if (
+        Phaser.Input.Keyboard.JustDown(cursors.space) &&
+        !this.playerAttacking
+      ) {
+        this.attack();
+      }
+    }
+    if (this.currentDirection === DIRECTION.UP) {
       this.weapon.setPosition(0, -40);
-    } else if (cursors.down.isDown) {
-      this.body.setVelocityY(this.velocity);
+    } else if (this.currentDirection === DIRECTION.DOWN) {
       this.weapon.setPosition(0, 40);
-      this.currentDirection = DIRECTION.DOWN;
+    } else if (this.currentDirection === DIRECTION.LEFT) {
+      this.weapon.setPosition(-40, 0);
+    } else if (this.currentDirection === DIRECTION.RIGHT) {
+      this.weapon.setPosition(40, 0);
     }
-
-    if (
-      Phaser.Input.Keyboard.JustDown(cursors.space) &&
-      !this.playerAttacking
-    ) {
-      this.attackAudio.play();
-      this.weapon.alpha = 1;
-      this.playerAttacking = true;
-      this.scene.time.delayedCall(
-        150,
-        () => {
-          this.weapon.alpha = 0;
-          this.playerAttacking = false;
-          this.swordHit = false;
-        },
-        [],
-        this
-      );
-    }
-
     if (this.playerAttacking) {
       if (this.weapon.flipX) {
         this.weapon.angle -= 10;
@@ -157,6 +154,25 @@ class PlayerContainer extends Phaser.GameObjects.Container {
 
   updateFlipX() {
     this.player.flipX = this.flipX;
+  }
+
+  attack() {
+    if (this.mainPlayer) {
+      this.attackAudio.play();
+    }
+
+    this.weapon.alpha = 1;
+    this.playerAttacking = true;
+    this.scene.time.delayedCall(
+      150,
+      () => {
+        this.weapon.alpha = 0;
+        this.playerAttacking = false;
+        this.swordHit = false;
+      },
+      [],
+      this
+    );
   }
 }
 

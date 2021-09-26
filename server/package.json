@@ -6,7 +6,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "dev": "nodemon index.js"
+    "dev": "nodemon --delay 1000 index.js"
   },
   "dependencies": {
     "bcrypt": "^5.0.1",

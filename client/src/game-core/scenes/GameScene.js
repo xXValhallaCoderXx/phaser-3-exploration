@@ -18,14 +18,14 @@ class GameScene extends Phaser.Scene {
     // Start will shut down current and switch to new
     this.scene.launch("Ui");
 
-    // List for socket events
+    // Listen for websocket Events
     this.socketListener();
   }
 
   socketListener() {
     // Spawn player game objects
     this.socket.on("currentPlayers", (players) => {
-      console.log("CUrrent players", players);
+      console.log("All current players: ", players);
       Object.keys(players).forEach((id) => {
         if (players[id].id === this.socket.id) {
           this.createPlayer(players[id], true);
@@ -49,10 +49,16 @@ class GameScene extends Phaser.Scene {
     this.socket.on("playerMoved", (player) => {
       this.otherPlayers.getChildren().forEach((otherPlayer) => {
         if (player.id === otherPlayer.id) {
+          console.log("OTHER PLAYER: ", otherPlayer);
           otherPlayer.flipX = player.flipX;
           otherPlayer.setPosition(player.x, player.y);
-          otherPlayer.updateHealth();
+          otherPlayer.updateHealthBar();
           otherPlayer.updateFlipX();
+          otherPlayer.playerAttacking = player.playerAttacking;
+          otherPlayer.currentDirection = player.currentDirection;
+          if (player.playerAttacking) {
+            otherPlayer.attack();
+          }
         }
       });
     });
@@ -79,14 +85,21 @@ class GameScene extends Phaser.Scene {
     // Check if current pos or flip x is different to rec to see if player moved
     if (this.player) {
       // emit movement to server
-      const { x, y, flipX } = this.player;
+      const { x, y, flipX, playerAttacking, currentDirection } = this.player;
       if (
         this.player.oldPosition &&
         (x !== this.player.oldPosition.x ||
           y !== this.player.oldPosition.y ||
-          flipX !== this.player.oldPosition.flipX)
+          flipX !== this.player.oldPosition.flipX ||
+          playerAttacking == !this.player.oldPosition.playerAttacking)
       ) {
-        this.socket.emit("playerMovement", { x, y, flipX });
+        this.socket.emit("playerMovement", {
+          x,
+          y,
+          flipX,
+          playerAttacking,
+          currentDirection,
+        });
       }
 
       // Save old position
@@ -94,6 +107,7 @@ class GameScene extends Phaser.Scene {
         x: this.player?.x ?? 0,
         y: this.player?.y ?? 0,
         flipX: this.player?.flipX,
+        playerAttacking: this.player?.playerAttacking,
       };
     }
   }
@@ -165,6 +179,7 @@ class GameScene extends Phaser.Scene {
 
     // Other plays
     this.otherPlayers = this.physics.add.group();
+    this.otherPlayers.runChildUpdate = true;
   }
 
   spawnChest(chestObj) {

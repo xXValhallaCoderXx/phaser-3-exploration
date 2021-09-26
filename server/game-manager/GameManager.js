@@ -1,5 +1,5 @@
 const PlayerModel = require("./PlayerModel");
-
+const levelData = require("../../client/src/shared/level/large_level.json");
 class GameManager {
   constructor(io) {
     this.io = io;
@@ -8,10 +8,7 @@ class GameManager {
     this.players = {};
     this.chests = {};
     this.monsters = {};
-    this.playerLocations = [
-      [50, 50],
-      [100, 100],
-    ];
+    this.playerLocations = [];
     this.chestLocations = {};
     this.monsterLocations = {};
   }
@@ -34,7 +31,33 @@ Because of that, when creating a new object from a Tiled map, you need to handle
 
 An easy way to fix that is changing the parseMapData method to adjust the locations accordingly, as below. Notice that, instead of using (obj.x, obj.y) we use (obj.x + (obj.width / 2), obj.y – (obj.height / 2)).
 */
-  parseMapData() {}
+  parseMapData() {
+    this.levelData = levelData;
+    console.log("level data: ", this.levelData);
+    this.levelData.layers.forEach((layer) => {
+      if (layer.name === "player_locations") {
+        layer.objects.forEach((obj) => {
+          this.playerLocations.push([obj.x, obj.y]);
+        });
+      } else if (layer.name === "monster_locations") {
+        layer.objects.forEach((obj) => {
+          if (this.monsterLocations[obj.properties.spawner]) {
+            this.monsterLocations[obj.properties.spawner].push([obj.x, obj.y]);
+          } else {
+            this.monsterLocations[obj.properties.spawner] = [[obj.x, obj.y]];
+          }
+        });
+      } else if (layer.name === "chest_locations") {
+        layer.objects.forEach((obj) => {
+          if (this.chestLocations[obj.properties.spawner]) {
+            this.chestLocations[obj.properties.spawner].push([obj.x, obj.y]);
+          } else {
+            this.chestLocations[obj.properties.spawner] = [[obj.x, obj.y]];
+          }
+        });
+      }
+    });
+  }
 
   setupEventListeners() {
     this.io.on("connection", (socket) => {
@@ -67,6 +90,9 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
           this.players[socket.id].x = playerData.x;
           this.players[socket.id].y = playerData.y;
           this.players[socket.id].flipX = playerData.flipX;
+          this.players[socket.id].playerAttacking = playerData.playerAttacking;
+          this.players[socket.id].currentDirection =
+            playerData.currentDirection;
 
           // Emit messagge to all players
           this.io.emit("playerMoved", this.players[socket.id]);

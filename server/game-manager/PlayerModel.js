@@ -4,6 +4,7 @@ class PlayerModel {
     this.maxHealth = 10;
     this.gold = 0;
     this.flipX = true;
+    this.playerAttacking = false;
     this.id = playerId;
     this.spawnLocations = spawnLocations;
 

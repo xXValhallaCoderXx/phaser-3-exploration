@@ -115,6 +115,58 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
           this.spawners[this.chests[chestID].spawnerId].removeObject(chestID);
         }
       });
+
+      socket.on("monsterAttacked", (monsterId) => {
+        // Update spawner
+        if (this.monsters[monsterId]) {
+          // Subtract HP
+          const { gold, attack } = this.monsters[monsterId];
+          this.monsters[monsterId].loseHealth();
+
+          // CHeck monster dead then remove
+          if (this.monsters[monsterId].health <= 0) {
+            // Update gold
+            this.players[socket.id].updateGold(gold);
+            socket.emit("updateScore", this.players[socket.id].gold);
+            // Check if exists in object array
+            // Get its spawnerID
+            // In spawner ID call remove object
+            this.spawners[this.monsters[monsterId].spawnerId].removeObject(
+              monsterId
+            );
+            this.io.emit("monsterRemoved", monsterId);
+            this.players[socket.id].updateHealth(2);
+            this.io.emit(
+              "updatePlayerHealth",
+              socket.id,
+              this.players[socket.id].health
+            );
+          } else {
+            this.players[socket.id].updateHealth(-attack);
+            this.io.emit(
+              "updateMonsterHealth",
+              monsterId,
+              this.monsters[monsterId].health
+            );
+
+            this.io.emit(
+              "updatePlayerHealth",
+              socket.id,
+              this.players[socket.id].health
+            );
+
+            // Chjeck player halth
+            if (this.players[socket.id].health <= 0) {
+              this.players[socket.id].updateGold(
+                parseInt(-this.players[socket.id].gold / 2)
+              );
+              socket.emit("updateScore", this.players[socket.id].gold);
+              this.players[socket.id].respawn();
+              this.io.emit("respawnPlayer", this.players[socket.id]);
+            }
+          }
+        }
+      });
     });
   }
   setupSpawners() {

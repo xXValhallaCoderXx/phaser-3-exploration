@@ -2,7 +2,6 @@ import Phaser from "phaser";
 import PlayerContainer from "game-core/classes/player/PlayerContainer";
 import Chest from "game-core/classes/Chest";
 import Monster from "game-core/classes/Monster";
-import GameManager from "game-core/classes/game-manager/GameManager";
 import Map from "game-core/classes/Map";
 import SocketService from "shared/services/socket/socket-service";
 
@@ -104,6 +103,42 @@ class GameScene extends Phaser.Scene {
     this.socket.on("updateScore", (goldAmount) => {
       this.events.emit("updateScore", goldAmount);
     });
+
+    this.socket.on("updateMonsterHealth", (monsterID, health) => {
+      this.monsters.getChildren().forEach((monster) => {
+        if (monster.id === monsterID) {
+          monster.updateHealth(health);
+        }
+      });
+    });
+
+    this.socket.on("updatePlayerHealth", (playerID, health) => {
+      if (this.player.id === playerID) {
+        if (health < this.player.health) {
+          this.playerDamageAudio.play();
+        }
+        this.player.updateHealth(health);
+      } else {
+        this.otherPlayers.getChildren().forEach((player) => {
+          if (player.id === playerID) {
+            player.updateHealth(health);
+          }
+        });
+      }
+    });
+
+    this.socket.on("respawnPlayer", (playerObject) => {
+      if (this.player.id === playerObject.id) {
+        this.player.respawn(playerObject);
+        this.playerDeathAudio.play();
+      } else {
+        this.otherPlayers.getChildren().forEach((player) => {
+          if (player.id === playerObject.id) {
+            player.respawn(playerObject);
+          }
+        });
+      }
+    });
   }
 
   preload() {}
@@ -115,7 +150,6 @@ class GameScene extends Phaser.Scene {
 
     this.createInput();
 
-    //  this.createGameManager();
     this.socket.emit("newPlayer");
   }
   update() {
@@ -303,7 +337,7 @@ class GameScene extends Phaser.Scene {
     if (this.player.playerAttacking && !this.player.swordHit) {
       this.player.swordHit = true;
       // enemy.makeInactive();
-      this.events.emit("monsterAttacked", enemy.id, this.player.id);
+      this.socket.emit("monsterAttacked", enemy.id);
     }
   }
 
@@ -319,35 +353,6 @@ class GameScene extends Phaser.Scene {
 
   createMap() {
     this.map = new Map(this, "map", "background", "background", "blocked");
-  }
-
-  createGameManager() {
-    // this.events.on("spawnPlayer", (player) => {
-    //   this.createPlayer(player);
-    //   this.addCollisions();
-    // });
-
-    this.events.on("updateMonsterHealth", (monsterID, health) => {
-      this.monsters.getChildren().forEach((monster) => {
-        if (monster.id === monsterID) {
-          monster.updateHealth(health);
-        }
-      });
-    });
-
-    this.events.on("updatePlayerHealth", (playerID, health) => {
-      this.player.updateHealth(health);
-      if (health < this.player.health) {
-        this.playerDamageAudio.play();
-      }
-    });
-
-    this.events.on("respawnPlayer", (player) => {
-      this.player.respawn(player);
-      this.playerDeathAudio.play();
-    });
-    this.gameManager = new GameManager(this, this.map.map.objects);
-    this.gameManager.setup();
   }
 }
 

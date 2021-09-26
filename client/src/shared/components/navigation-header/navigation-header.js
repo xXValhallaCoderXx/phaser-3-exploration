@@ -1,12 +1,16 @@
 import styled from "styled-components";
-import { Link as RouterLink } from "react-router-dom";
-const NavigationHeader = () => {
+import { Link as RouterLink, useLocation } from "react-router-dom";
+const NavigationHeader = ({ isAuthenticated = false }) => {
+  const location = useLocation();
+
+  if (location.pathname === "/") {
+    return null;
+  }
   return (
     <Container>
       <Link to="/">Login</Link>
-      <Link to="/register">Register</Link>
-      <Link to="/forgot-password">Forgot Password</Link>
-      <Link to="/game">Game</Link>
+
+      {isAuthenticated && <Link to="/game">Game</Link>}
     </Container>
   );
 };

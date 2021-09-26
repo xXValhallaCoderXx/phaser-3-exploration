@@ -1,29 +1,20 @@
-import { Route, Switch } from "react-router-dom";
-import SignInContainer from "./pages/auth/sign-in";
-import Register from "./pages/auth/register";
+import { Route, Switch, Redirect } from "react-router-dom";
 import Game from "./pages/game";
-import ForgotPassword from "./pages/auth/forgot-password";
-import ResetPassword from "./pages/auth/reset-password";
+import AuthRoutes from "./pages/auth";
+import { ProtectedRoute } from "shared/components/protected-route";
 import NavigationHeader from "shared/components/navigation-header/navigation-header";
 const RootRoutes = () => {
   return (
     <>
       <NavigationHeader />
       <Switch>
-        <Route exact path="/">
-          <SignInContainer />
+        <Route path="/auth/*">
+          <AuthRoutes />
         </Route>
-        <Route path="/register">
-          <Register />
-        </Route>
-        <Route path="/forgot-password">
-          <ForgotPassword />
-        </Route>
-        <Route path="/reset-password">
-          <ResetPassword />
-        </Route>
-        <Route path="/game">
-          <Game />
+
+        <ProtectedRoute path="/game" component={Game} isAuthenticated={false} />
+        <Route>
+          <Redirect to="/auth/login" />
         </Route>
       </Switch>
     </>

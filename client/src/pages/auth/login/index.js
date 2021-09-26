@@ -1,7 +1,7 @@
 import { useState } from "react";
 import styled from "styled-components";
 import { apiCall } from "shared/api";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { Card, Button, Input, FormField, FormLabel } from "shared/components";
 
@@ -60,7 +60,15 @@ const SignInContainer = () => {
             <Button type="submit">Sign In</Button>
           </ActionContainer>
         </form>
+        <ForgotWrapper>
+          <ForgotLabel>Trouble signing in?</ForgotLabel>
+          <Link to="/auth/forgot-password">Forgot Password</Link>
+        </ForgotWrapper>
       </Card>
+      <SignupWrapper>
+        <Label>Don't yet have an account?</Label>
+        <StyledLink to="/auth/register">Sign up!</StyledLink>
+      </SignupWrapper>
     </Container>
   );
 };
@@ -92,6 +100,29 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+`;
+
+const SignupWrapper = styled.div`
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+`;
+
+const ForgotWrapper = styled.div`
+  margin-top: 10px;
+  font-size: 8px;
+  display: flex;
+  flex-direction: row;
+`;
+
+const StyledLink = styled(Link)`
+  font-size: 12px;
+`;
+
+const ForgotLabel = styled.div`
+  margin-right: 5px;
 `;
 
 export default SignInContainer;

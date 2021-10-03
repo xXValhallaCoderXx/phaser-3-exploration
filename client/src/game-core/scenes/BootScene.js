@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import button1 from "shared/images/ui/blue_button01.png";
 import button2 from "shared/images/ui/blue_button02.png";
 import background from "shared/level/background-extruded.png";
-import goalSound from "shared/audio/Pickup.wav";
+import goldSound from "shared/audio/Pickup.wav";
 import enemyDeath from "shared/audio/EnemyDeath.wav";
 import playerAttack from "shared/audio/PlayerAttack.wav";
 import playerDamage from "shared/audio/PlayerDamage.wav";
@@ -46,7 +46,7 @@ class BootScene extends Phaser.Scene {
 
   loadAudio() {
     // Could provide a wav and mp3 and phaser will choose best one for broswser
-    this.load.audio("goalSound", [goalSound]);
+    this.load.audio("goldSound", [goldSound]);
     this.load.audio("enemyDeath", [enemyDeath]);
     this.load.audio("playerAttack", [playerAttack]);
     this.load.audio("playerDamage", [playerDamage]);

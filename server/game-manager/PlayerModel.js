@@ -25,8 +25,9 @@ class PlayerModel {
   respawn(players) {
     this.health = this.maxHealth;
     const location = this.generateLocation(players);
-    this.x = location[0] * 2;
-    this.y = location[1] * 2;
+    // this.x = location[0] * 2;
+    // this.y = location[1] * 2;
+    [this.x, this.y] = location;
   }
 
   generateLocation(players) {

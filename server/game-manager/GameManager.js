@@ -8,9 +8,11 @@ class GameManager {
     this.io = io;
 
     this.spawners = {};
+
     this.players = {};
     this.chests = {};
     this.monsters = {};
+
     this.playerLocations = [];
     this.chestLocations = {};
     this.monsterLocations = {};
@@ -24,10 +26,6 @@ class GameManager {
   /* 
 
 
-Logout
-My Courses
-Subscriber Discounts
-My Account
 The anchor point of an object is the point of its sprite where its location points to. For example, in Tiled, the location of an object refers to the location of its bottom left corner. On the other hand, in Phaser 3, the default anchor point is the middle of the object.
 
 Because of that, when creating a new object from a Tiled map, you need to handle this difference in order to create the object visually in the same location as in the Tiled map.
@@ -65,7 +63,7 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
   setupEventListeners() {
     this.io.on("connection", (socket) => {
       socket.on("disconnect", () => {
-        console.log("Player Discconect: ");
+  
         // Delete from server
         delete this.players[socket.id];
         // Emit to all players
@@ -171,28 +169,28 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
       socket.on("attackedPlayer", (attackedPlayerId) => {
         if (this.players[attackedPlayerId]) {
           // Get info from attacked player
-          const attackedPlayer = this.players[attackedPlayerId];
-          const { gold } = attackedPlayer;
+          // const attackedPlayer = this.players[attackedPlayerId];
+          const { gold } = this.players[attackedPlayerId];
 
           // Remove HP from attacked player
-          attackedPlayer.updateHealth(-1);
+          this.players[attackedPlayerId].updateHealth(-1);
           // CHeck HP and if dead give gold to player
-          if (attackedPlayer.health <= 0) {
+          if (this.players[attackedPlayerId].health <= 0) {
             // Get gold from layer
             this.players[socket.id].updateGold(gold);
             // Respanw attacked player
 
-            attackedPlayer.respawn(this.players);
-            this.io.emit("respawnPlayer", attackedPlayer);
+            this.players[attackedPlayerId].respawn(this.players);
+            this.io.emit("respawnPlayer", this.players[attackedPlayerId]);
 
             // Send udate gold message to player
             socket.emit("updateScore", this.players[socket.id].gold);
 
             // REset attacked players gold
-            attackedPlayer.updateGold(-gold);
+            this.players[attackedPlayerId].updateGold(-gold);
             this.io
               .to(`${attackedPlayerId}`)
-              .emit("updateScore", attackedPlayer.gold);
+              .emit("updateScore", this.players[attackedPlayerId].gold);
 
             // GIve bonus HP to player that won
             this.players[socket.id].updateHealth(2);
@@ -205,7 +203,7 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
             this.io.emit(
               "updatePlyaerHealth",
               attackedPlayerId,
-              attackedPlayer.health
+              this.players[attackedPlayerId].health
             );
           }
         }

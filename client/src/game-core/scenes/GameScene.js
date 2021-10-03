@@ -141,6 +141,7 @@ class GameScene extends Phaser.Scene {
     });
 
     this.socket.on("playerDisconnect", (playerID) => {
+
       this.otherPlayers.getChildren().forEach((player) => {
         if (playerID === player.id) {
           player.cleanUp();

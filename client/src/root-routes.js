@@ -12,7 +12,7 @@ const RootRoutes = () => {
           <AuthRoutes />
         </Route>
 
-        <ProtectedRoute path="/game" component={Game} isAuthenticated={false} />
+        <Route path="/game" component={Game} isAuthenticated={false} />
         <Route>
           <Redirect to="/auth/login" />
         </Route>

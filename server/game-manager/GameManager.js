@@ -201,7 +201,7 @@ An easy way to fix that is changing the parseMapData method to adjust the locati
             );
           } else {
             this.io.emit(
-              "updatePlyaerHealth",
+              "updatePlayerHealth",
               attackedPlayerId,
               this.players[attackedPlayerId].health
             );
